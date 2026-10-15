@@ -104,8 +104,8 @@ jobs:
                       feed=json.load(resp)
                       if resp.status!=200 or feed.get('schema')!=5 or len(feed.get('history',[]))<20:
                           raise RuntimeError('Invalid public JSON feed')
-                  if 'rel="manifest"' not in page or 'class="footer-version" aria-label="版本号">4.3' not in page:
-                      raise RuntimeError('Published HTML lacks 4.3 icon metadata')
+                  if 'rel="manifest"' not in page or 'class="footer-version" aria-label="版本号">4.4' not in page:
+                      raise RuntimeError('Published HTML lacks current 4.4 metadata')
                   for asset, prefix in [('manifest.webmanifest',b'{'),('favicon.svg',b'<svg'),('icons/icon-192.png',b'\x89PNG\r\n\x1a\n'),('icons/icon-512.png',b'\x89PNG\r\n\x1a\n')]:
                       req=urllib.request.Request(base+asset+'?smoke='+str(int(time.time())),headers={'Cache-Control':'no-cache','User-Agent':'FuelPricePagesSmokeTest/1.0'})
                       with urllib.request.urlopen(req,timeout=18) as resp:
