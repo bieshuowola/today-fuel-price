@@ -16,15 +16,15 @@
   <section class="card chart-card" aria-label="价格走势图与统计">
     <div class="section-head chart-head"><div class="section-intro"><h2 class="section-title">价格走势</h2><div class="section-sub">按实际日期间隔绘制</div></div><div class="periods" role="group" aria-label="图表与统计时间范围"><button data-period="90" aria-pressed="false">3 月</button><button data-period="180" aria-pressed="false">半年</button><button data-period="365" class="active" aria-pressed="true">1 年</button><button data-period="730" aria-pressed="false">2 年</button></div></div>
     <div class="legend"><i aria-hidden="true"></i><span id="legendText">95 号汽油</span><span style="font-size:10px;color:#abb3bf">· 元/升</span></div>
-    <div class="chart-shell" id="chartShell"><svg id="chart" viewBox="0 0 420 270" preserveAspectRatio="xMidYMid meet" role="img" aria-label="油价历史走势图"></svg><div class="chart-tip" id="tip"><small id="tipDate"></small><strong id="tipPrice"></strong><em id="tipNote"></em></div></div>
-    <div class="chart-foot"><span>轻触或拖动查看节点</span><span id="coverage">福建省发改委公告历史</span></div>
+    <div class="chart-shell" id="chartShell" tabindex="0" aria-label="价格趋势；触摸或按左右方向键查看实际调价"><svg id="chart" viewBox="0 0 420 270" preserveAspectRatio="xMidYMid meet" role="img" aria-label="油价历史走势图"></svg><div class="chart-tip" id="tip"><small id="tipDate"></small><strong id="tipPrice"></strong><em id="tipNote"></em></div></div>
+    <div class="chart-foot"><span>轻触或滑动曲线，查看调价详情</span><span id="coverage">福建省发改委公告历史</span></div>
     <div class="stats"><div class="stats-title" id="statsTitle">近 1 年价格统计</div><div class="stat-grid"><div class="stat"><div class="stat-label">最低价</div><strong class="low" id="statMin">—</strong><small id="minAt">—</small></div><div class="stat"><div class="stat-label">最高价</div><strong class="high" id="statMax">—</strong><small id="maxAt">—</small></div><div class="stat"><div class="stat-label">距最低价</div><strong id="statDistance">—</strong><small id="distanceNote">—</small></div></div></div>
   </section>
   <section class="card history-card" aria-label="近期六次实际调价"><div class="section-head"><h2 class="section-title">近期调价</h2><div class="section-sub">最新在前</div></div><div id="recentSubtitle" class="section-sub">最近 6 次实际价格变化 · 排除持平窗口</div><div id="records" class="records"></div></section>
   <footer>
     <div>92 / 95 号的正式历史采用福建省发展和改革委员会公告所列最高零售价格；98 号只作第三方参考。价格变化与统计由同一份数据实时联动计算，免费 API 的新价格需经过官方复核。下轮预测并非确定价格；实际价格以加油站挂牌为准。</div>
     <div class="foot-links"><a href="https://fgw.fujian.gov.cn/ztzl/fjswjj/cpygg/" target="_blank" rel="noopener noreferrer">福建省发改委公告 ↗</a><a href="https://docs.60s-api.viki.moe/376793576e0" target="_blank" rel="noopener noreferrer">第三方油价 API ↗</a></div>
-    <div class="footer-version" aria-label="版本号">4.7</div>
+    <div class="footer-version" aria-label="版本号">4.8</div>
   </footer>
 </main>
 <div id="toast" class="toast" role="status"></div>

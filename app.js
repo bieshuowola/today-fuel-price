@@ -93,10 +93,32 @@ function monotonePath(dots){if(!dots.length)return '';if(dots.length===1)return 
  let path=`M ${dots[0].x.toFixed(2)} ${dots[0].y.toFixed(2)}`;
  for(let i=0;i<n-1;i++){const a=dots[i],b=dots[i+1],dx=b.x-a.x;path+=` C ${(a.x+dx/3).toFixed(2)} ${(a.y+slopes[i]*dx/3).toFixed(2)}, ${(b.x-dx/3).toFixed(2)} ${(b.y-slopes[i+1]*dx/3).toFixed(2)}, ${b.x.toFixed(2)} ${b.y.toFixed(2)}`;}
  return path;}
+function chartTimeAxis(start,end,left,right,height){
+ const startAt=millis(start),endAt=millis(end),span=Math.max(1,endAt-startAt),plotWidth=right-left;
+ const crossYear=start.slice(0,4)!==end.slice(0,4),inset=Math.min(23,plotWidth/8);
+ let axis='';
+ for(let i=0;i<4;i++){
+  const px=left+inset+(plotWidth-2*inset)*i/3,t=startAt+(px-left)/plotWidth*span,dt=new Date(t+8*36e5);
+  const date=`${two(dt.getUTCMonth()+1)}/${two(dt.getUTCDate())}`;
+  axis+=`<text class="chart-axis-label x-date" x="${px.toFixed(2)}" y="${height-(crossYear?45:15)}" text-anchor="middle">${date}</text>`;
+ }
+ if(crossYear){
+  for(let year=Number(start.slice(0,4));year<=Number(end.slice(0,4));year++){
+   const a=Math.max(startAt,millis(`${year}-01-01`)),b=Math.min(endAt,millis(`${year+1}-01-01`));
+   if(b<=a)continue;
+   const x1=left+(a-startAt)/span*plotWidth,x2=left+(b-startAt)/span*plotWidth;
+   const gap=Math.min(6,(x2-x1)/9);
+   if(x2-x1>=18)axis+=`<line class="chart-year-rule" x1="${(x1+gap).toFixed(2)}" x2="${(x2-gap).toFixed(2)}" y1="${height-31}" y2="${height-31}"/>`;
+   const middle=Math.max(left+13,Math.min(right-13,(x1+x2)/2));
+   axis+=`<text class="chart-axis-label x-year-band" x="${middle.toFixed(2)}" y="${height-11}" text-anchor="middle">${year}</text>`;
+  }
+ }
+ return axis;
+}
 function renderChart(view){$('legendText').textContent=state.grade+' 号汽油';$('coverage').textContent=state.grade==='98'?(view.all.length>=2?`第三方记录 · ${fmtDay(view.all[0].day)}—${fmtDay(view.all.at(-1).day)} · 非完整周期`:'98 号历史样本积累中'):view.stale?'部分数据可能过期 · 等待同步':view.uncertain?'含待核实观察节点 · 统计仅供参考':`日期范围 · ${view.start.replaceAll('-','/')}—${view.end.replaceAll('-','/')}`;
  const svg=$('chart'),shell=$('chartShell'),tip=$('tip'),W=shell.clientWidth||420,H=shell.clientHeight||270,mobile=W<520;tip.classList.remove('visible','below');let pts=view.points;if(pts.length<2){svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle" class="chart-axis-label">${state.grade==='98'?'98 号历史记录仍不足以画出趋势':'尚无足够历史记录'}</text>`;return;}
  // Draw in real CSS-pixel coordinates to keep circular markers and type undistorted.
- const L=mobile?40:52,R=mobile?10:18,T=27,B=49,ww=W-L-R,hh=H-T-B;
+ const crossYear=view.start.slice(0,4)!==view.end.slice(0,4);const L=mobile?40:52,R=mobile?10:18,T=27,B=crossYear?63:43,ww=W-L-R,hh=H-T-B;
  const mn=Math.min(...pts.map(p=>p.p)),mx=Math.max(...pts.map(p=>p.p)),margin=Math.max(.14,(mx-mn)*.22),bottom=mn-margin,top=mx+margin;
  const x=p=>L+ww*(millis(p.day)-millis(view.start))/Math.max(1,millis(view.end)-millis(view.start));const y=v=>T+(top-v)/(top-bottom)*hh;
  const dots=pts.map(p=>({...p,x:x(p),y:y(p.p)}));const path=monotonePath(dots);
@@ -104,15 +126,54 @@ function renderChart(view){$('legendText').textContent=state.grade+' 号汽油';
  // so it also works in Android's file:// viewer without external styles or scripts.
  let html=`<defs><linearGradient id="fuelAreaGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4896fa" stop-opacity=".41"/><stop offset="48%" stop-color="#6aafff" stop-opacity=".25"/><stop offset="100%" stop-color="#d6e7ff" stop-opacity=".075"/></linearGradient></defs>`;
  for(let i=0;i<4;i++){const yy=T+hh*i/3;html+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="#edf0f4" stroke-dasharray="3 7"/><text class="chart-axis-label" x="${L-9}" y="${yy+4}" text-anchor="end">${cash(top-(top-bottom)*i/3)}</text>`;}
- for(let i=0;i<4;i++){const t=millis(view.start)+i*(millis(view.end)-millis(view.start))/3,dt=new Date(t+8*36e5),xx=L+i*ww/3,anchor=i===0?'start':i===3?'end':'middle',md=`${two(dt.getUTCMonth()+1)}/${two(dt.getUTCDate())}`,year=dt.getUTCFullYear();html+=`<text class="chart-axis-label x-date" x="${xx}" y="${H-25}" text-anchor="${anchor}">${md}</text><text class="chart-axis-label x-year" x="${xx}" y="${H-10}" text-anchor="${anchor}">${year}</text>`;}
- html+=`<path d="${path} L ${dots.at(-1).x.toFixed(2)} ${H-B} L ${dots[0].x.toFixed(2)} ${H-B} Z" fill="url(#fuelAreaGradient)"/><path d="${path}" fill="none" stroke="#297cf2" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/>`;
- const pointDots=dots.filter(d=>!d.carried&&!d.baseline);
- for(const p of pointDots){html+=`<circle cx="${p.x}" cy="${p.y}" r="3.6" fill="#297cf2"/>`;}
- html+=`<line id="crossV" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="#7b8da5" stroke-width="1.3" opacity="0"/><line id="crossH" x1="${L}" x2="${W-R}" y1="0" y2="0" stroke="#c4d0dd" stroke-dasharray="4 5" opacity="0"/><circle id="crossDot" cx="0" cy="0" r="4" fill="#297cf2" stroke="white" stroke-width="1.4" opacity="0"/>`;
+ html+=chartTimeAxis(view.start,view.end,L,W-R,H);
+ html+=`<path d="${path} L ${dots.at(-1).x.toFixed(2)} ${H-B} L ${dots[0].x.toFixed(2)} ${H-B} Z" fill="url(#fuelAreaGradient)"/><path d="${path}" fill="none" stroke="#297cf2" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+ // Hidden price nodes: real event coordinates are retained for touch selection.
+ html+=`<line id="crossV" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="#7b8da5" stroke-width="1.3" opacity="0"/><line id="crossH" x1="${L}" x2="${W-R}" y1="0" y2="0" stroke="#c4d0dd" stroke-dasharray="4 5" opacity="0"/><circle id="crossDot" cx="0" cy="0" r="5" fill="#297cf2" stroke="white" stroke-width="2" opacity="0"/>`;
  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('preserveAspectRatio','xMidYMid meet');svg.innerHTML=html;svg.setAttribute('aria-label',`${state.grade}号汽油${state.period}天范围价格变化`);
- function show(i){const p=dots[i],bound=shell.getBoundingClientRect(),v=svg.querySelector('#crossV'),h=svg.querySelector('#crossH'),circle=svg.querySelector('#crossDot');v.setAttribute('x1',p.x);v.setAttribute('x2',p.x);v.setAttribute('opacity','1');h.setAttribute('y1',p.y);h.setAttribute('y2',p.y);h.setAttribute('opacity','1');circle.setAttribute('cx',p.x);circle.setAttribute('cy',p.y);circle.setAttribute('opacity','1');tip.classList.toggle('below',p.y<105);tip.style.left=`${Math.max(69,Math.min(bound.width-69,p.x/W*bound.width))}px`;tip.style.top=`${p.y<105?p.y/H*bound.height+8:p.y/H*bound.height-8}px`;$('tipDate').textContent=(p.publish||p.day).replaceAll('-','/');$('tipPrice').textContent='¥'+cash(p.p)+' / 升';$('tipNote').textContent=p.baseline?'期初在售':p.carried?'沿用上次价格':state.grade==='98'?'第三方参考价':p.kind==='observed'?'第三方观察（未核验）':'官方调整价';tip.classList.add('visible');}
- const choose=e=>{const rect=shell.getBoundingClientRect(),coord=(e.clientX-rect.left)/rect.width*W;let ix=0;dots.forEach((d,i)=>{if(Math.abs(d.x-coord)<Math.abs(dots[ix].x-coord))ix=i});show(ix)};
- shell.onpointermove=choose;shell.onpointerdown=choose;shell.onpointerleave=()=>{tip.classList.remove('visible');['crossV','crossH','crossDot'].forEach(id=>svg.querySelector('#'+id)?.setAttribute('opacity','0'));};
+ const selectable=dots.filter(p=>!p.baseline&&!p.carried),candidates=selectable.length?selectable:[dots[0]];
+ let selectedIndex=-1,dragging=false;
+ function hideSelection(){
+  selectedIndex=-1;tip.classList.remove('visible','below');
+  for(const id of ['crossV','crossH','crossDot'])svg.querySelector('#'+id)?.setAttribute('opacity','0');
+ }
+ function show(index){
+  selectedIndex=Math.max(0,Math.min(candidates.length-1,index));
+  const p=candidates[selectedIndex],v=svg.querySelector('#crossV'),h=svg.querySelector('#crossH'),dot=svg.querySelector('#crossDot');
+  v.setAttribute('x1',p.x);v.setAttribute('x2',p.x);v.setAttribute('opacity','1');
+  h.setAttribute('y1',p.y);h.setAttribute('y2',p.y);h.setAttribute('opacity','1');
+  dot.setAttribute('cx',p.x);dot.setAttribute('cy',p.y);dot.setAttribute('opacity','1');
+  tip.classList.toggle('below',p.y<105);
+  tip.style.left=`${Math.max(72,Math.min(W-72,p.x))}px`;
+  tip.style.top=`${p.y<105?p.y+9:p.y-8}px`;
+  $('tipDate').textContent=(p.publish||p.day).replaceAll('-','/');
+  $('tipPrice').textContent='¥'+cash(p.p)+' / 升';
+  $('tipNote').textContent=p.baseline?'期初在售':state.grade==='98'?'第三方参考价':p.kind==='observed'?'第三方观察（未核验）':'官方调整价';
+  tip.classList.add('visible');
+ }
+ function choose(e){
+  const rect=svg.getBoundingClientRect(),target=(e.clientX-rect.left)/rect.width*W;
+  let closest=0;
+  for(let i=1;i<candidates.length;i++)if(Math.abs(candidates[i].x-target)<Math.abs(candidates[closest].x-target))closest=i;
+  show(closest);
+ }
+ shell.chartClearSelection=hideSelection;
+ shell.onpointerdown=e=>{
+  dragging=true;choose(e);
+  if(e.pointerType==='mouse'&&shell.setPointerCapture)try{shell.setPointerCapture(e.pointerId)}catch{}
+ };
+ shell.onpointermove=e=>{if(dragging||e.pointerType==='mouse')choose(e);};
+ shell.onpointerup=e=>{
+  dragging=false;
+  if(shell.hasPointerCapture?.(e.pointerId))try{shell.releasePointerCapture(e.pointerId)}catch{}
+ };
+ shell.onpointercancel=()=>{dragging=false;};
+ shell.onpointerleave=()=>{dragging=false;}; // Keep selected node after touch release.
+ shell.onkeydown=e=>{
+  if(e.key==='Escape'){hideSelection();return;}
+  if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;
+  e.preventDefault();show(Math.max(0,(selectedIndex<0?0:selectedIndex)+(e.key==='ArrowRight'?1:-1)));
+ };
 }
 function render(){renderHeader();renderCalendar();renderForecast();renderRecent();const view=periodEntries(state.grade,state.period);renderChart(view);renderStats(view);}
 function toast(msg){const n=$('toast');n.textContent=msg;n.classList.add('show');clearTimeout(toast.handle);toast.handle=setTimeout(()=>n.classList.remove('show'),3400);}
@@ -149,6 +210,7 @@ async function refresh(user=false){if(state.loading)return;state.loading=true;st
 document.querySelectorAll('[data-grade]').forEach(b=>b.addEventListener('click',()=>{state.grade=b.dataset.grade;state.hoverIndex=null;persist();render();}));document.querySelectorAll('[data-period]').forEach(b=>b.addEventListener('click',()=>{state.period=Number(b.dataset.period);persist();render();}));
 $('refresh').addEventListener('click',()=>refresh(true));
 window.addEventListener('resize',()=>renderChart(periodEntries(state.grade,state.period)));
+document.addEventListener('pointerdown',e=>{const shell=$('chartShell');if(shell&&!shell.contains(e.target))shell.chartClearSelection?.();});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-state.lastCheck>3*60*1000)refresh(false);});
 window.addEventListener('online',()=>refresh(false));render();refresh();
 let lastRenderedDay=today();
