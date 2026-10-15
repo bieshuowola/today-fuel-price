@@ -1,0 +1,61 @@
+name: Sync Fujian fuel prices and publish dashboard
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: fuel-price-site
+  cancel-in-progress: false
+jobs:
+  sync-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline parser and regression tests
+        run: python -m unittest discover -s scripts -p 'test_*.py' -v
+      - name: Verify new official notices and fetch current price
+        id: sync
+        continue-on-error: true
+        run: python scripts/update_feed.py
+      - name: Persist verified dataset in repository
+        if: steps.sync.outcome == 'success'
+        shell: bash
+        run: |
+          git config user.name 'fuel-price-bot'
+          git config user.email 'fuel-price-bot@users.noreply.github.com'
+          git add data/latest.json
+          if git diff --cached --quiet; then
+            echo 'No changed public dataset to commit.'
+          else
+            git commit -m 'Update Fujian fuel prices'
+            git push
+          fi
+      - name: Prepare minimal public site
+        shell: bash
+        run: |
+          mkdir -p public/data
+          cp index.html public/index.html
+          cp data/latest.json public/data/latest.json
+          touch public/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+      - id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Flag failed sync without taking the previously usable website offline
+        if: steps.sync.outcome == 'failure'
+        run: |
+          echo 'Official sync failed. Previous data was published unchanged and will show an expired status.'
+          exit 1
