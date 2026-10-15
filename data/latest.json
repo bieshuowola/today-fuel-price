@@ -1,0 +1,396 @@
+{
+  "schema": 5,
+  "region": "福建宁德",
+  "generated_at": "2026-10-16T00:00:00+08:00",
+  "history": [
+    {
+      "day": "2024-09-20",
+      "p": {
+        "92": 7.34,
+        "95": 7.83
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202409/t20240920_6526829.htm",
+      "source": "official"
+    },
+    {
+      "day": "2024-10-10",
+      "p": {
+        "92": 7.45,
+        "95": 7.95
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202410/t20241010_6540966.htm",
+      "source": "official"
+    },
+    {
+      "day": "2024-10-23",
+      "p": {
+        "92": 7.52,
+        "95": 8.03
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202410/t20241023_6552690.htm",
+      "source": "official"
+    },
+    {
+      "day": "2024-11-06",
+      "p": {
+        "92": 7.4,
+        "95": 7.91
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202411/t20241106_6562963.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-01-02",
+      "p": {
+        "92": 7.46,
+        "95": 7.97
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202501/t20250102_6601682.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-01-16",
+      "p": {
+        "92": 7.73,
+        "95": 8.26
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202501/t20250116_6703721.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-02-19",
+      "p": {
+        "92": 7.6,
+        "95": 8.11
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202502/t20250219_6765988.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-03-05",
+      "p": {
+        "92": 7.49,
+        "95": 8
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202503/t20250305_6773083.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-03-19",
+      "p": {
+        "92": 7.27,
+        "95": 7.76
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202503/t20250319_6785445.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-04-02",
+      "p": {
+        "92": 7.45,
+        "95": 7.95
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202504/t20250402_6796360.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-04-17",
+      "p": {
+        "92": 7.07,
+        "95": 7.55
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202504/t20250417_6901694.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-05-19",
+      "p": {
+        "92": 6.88,
+        "95": 7.35
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202505/t20250519_6915311.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-06-03",
+      "p": {
+        "92": 6.94,
+        "95": 7.41
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202506/t20250603_6921032.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-06-17",
+      "p": {
+        "92": 7.14,
+        "95": 7.63
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202506/t20250617_6928392.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-07-01",
+      "p": {
+        "92": 7.33,
+        "95": 7.83
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202507/t20250701_6960534.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-07-15",
+      "p": {
+        "92": 7.23,
+        "95": 7.72
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202507/t20250715_6967533.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-08-26",
+      "p": {
+        "92": 7.08,
+        "95": 7.56
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202508/t20250826_6995886.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-10-13",
+      "p": {
+        "92": 7.02,
+        "95": 7.5
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202510/t20251013_7020867.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-10-27",
+      "p": {
+        "92": 6.81,
+        "95": 7.27
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202510/t20251027_7026572.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-11-10",
+      "p": {
+        "92": 6.91,
+        "95": 7.38
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202511/t20251110_7032244.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-11-24",
+      "p": {
+        "92": 6.86,
+        "95": 7.32
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202511/t20251124_7037376.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-12-08",
+      "p": {
+        "92": 6.81,
+        "95": 7.27
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202512/t20251208_7043938.htm",
+      "source": "official"
+    },
+    {
+      "day": "2025-12-22",
+      "p": {
+        "92": 6.68,
+        "95": 7.13
+      },
+      "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202512/t20251222_7049242.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-01-20",
+      "p": {
+        "92": 6.74,
+        "95": 7.2
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202601/t20260120_7083070.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-02-03",
+      "p": {
+        "92": 6.91,
+        "95": 7.38
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202602/t20260203_7088713.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-02-24",
+      "p": {
+        "92": 7.05,
+        "95": 7.52
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202602/t20260224_7100324.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-03-09",
+      "p": {
+        "92": 7.6,
+        "95": 8.12
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202603/t20260309_7107766.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-03-23",
+      "p": {
+        "92": 8.52,
+        "95": 9.1
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202603/t20260323_7114772.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-04-07",
+      "p": {
+        "92": 8.86,
+        "95": 9.46
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202604/t20260407_7120177.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-04-21",
+      "p": {
+        "92": 8.42,
+        "95": 8.99
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202604/t20260421_7129786.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-05-08",
+      "p": {
+        "92": 8.67,
+        "95": 9.26
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202605/t20260508_7145697.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-05-21",
+      "p": {
+        "92": 8.73,
+        "95": 9.32
+      },
+      "url": "https://fgw.fj.gov.cn/zwgk/gsgg/202605/t20260521_7150743.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-06-04",
+      "p": {
+        "92": 8.31,
+        "95": 8.88
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202606/t20260604_7156802.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-06-18",
+      "p": {
+        "92": 7.9,
+        "95": 8.44
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202606/t20260618_7165066.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-07-03",
+      "p": {
+        "92": 7.15,
+        "95": 7.63
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202607/t20260703_7172084.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-07-17",
+      "p": {
+        "92": 7.38,
+        "95": 7.89
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202607/t20260717_7189555.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-07-31",
+      "p": {
+        "92": 7.93,
+        "95": 8.47
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202607/t20260731_7194751.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-08-14",
+      "p": {
+        "92": 7.75,
+        "95": 8.27
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202608/t20260814_7199969.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-08-28",
+      "p": {
+        "92": 8.05,
+        "95": 8.59
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202608/t20260828_7206352.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-09-11",
+      "p": {
+        "92": 8.25,
+        "95": 8.81
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202609/t20260911_7212495.htm",
+      "source": "official"
+    },
+    {
+      "day": "2026-09-24",
+      "p": {
+        "92": 8.57,
+        "95": 9.15
+      },
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202609/t20260924_7218113.htm",
+      "source": "official"
+    }
+  ],
+  "latest_official_day": "2026-09-24",
+  "official_index": "https://fgw.fujian.gov.cn/ztzl/fjswjj/cpygg/",
+  "current": null,
+  "forecast": null,
+  "windows": [
+    "2026-10-29",
+    "2026-11-12",
+    "2026-11-26",
+    "2026-12-10",
+    "2026-12-24"
+  ],
+  "obs98": [],
+  "health": {
+    "checked_at": null,
+    "index_ok": false,
+    "link_count": 0,
+    "verified_count": 0,
+    "api_ok": false,
+    "api_latest_asof": null
+  }
+}
