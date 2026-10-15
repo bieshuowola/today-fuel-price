@@ -62,4 +62,40 @@ class SyncTests(unittest.TestCase):
   with mock.patch.object(sync,'fetch',return_value=json.dumps(fixture)):
    self.assertEqual(sync.get_current(NOW),(None,None))
 
+
+ def test_98_validated_ruseo_quote(self):
+  raw={'success':True,'list':[{'region':'福建省','date':'2026-09-24','gasoline_92':8.57,'gasoline_95':9.15,'gasoline_98':10.70}]}
+  item=sync.parse_98_reference('ruseo',raw,{'92':8.57,'95':9.15},'2026-09-24',NOW)
+  self.assertEqual(item['p98'],10.70)
+  self.assertEqual(item['price_date'],'2026-09-24')
+
+ def test_98_validated_apizero_quote(self):
+  raw={'code':0,'data':{'province':'福建','update_date':'2026-09-24','prices':[
+   {'type':'gasoline_92','price':8.57,'unit':'元/升'},
+   {'type':'gasoline_95','price':9.15,'unit':'元/升'},
+   {'type':'gasoline_98','price':10.70,'unit':'元/升'}]}}
+  item=sync.parse_98_reference('apizero',raw,{'92':8.57,'95':9.15},'2026-09-24',NOW)
+  self.assertEqual(item['p98'],10.70)
+
+ def test_98_rejects_stale_discordant_or_wrong_region(self):
+  base={'success':True,'list':[{'region':'福建','date':'2026-09-24','gasoline_92':8.57,'gasoline_95':9.15,'gasoline_98':10.70}]}
+  for k,v in [('date','2026-07-01'),('gasoline_95',8.33),('region','广东')]:
+   raw=json.loads(json.dumps(base));raw['list'][0][k]=v
+   with self.assertRaises(ValueError):
+    sync.parse_98_reference('ruseo',raw,{'92':8.57,'95':9.15},'2026-09-24',NOW)
+
+ def test_98_fallback_provider_errors_are_nonfatal(self):
+  with mock.patch.object(sync,'fetch_json_api',side_effect=RuntimeError('denied')):
+   self.assertIsNone(sync.get_98_reference(NOW,{'92':8.57,'95':9.15},'2026-09-24'))
+
+ def test_98_fallback_to_second_provider(self):
+  bad={'success':False,'list':[]}
+  good={'code':0,'data':{'province':'福建','update_date':'2026-09-24','prices':[
+    {'type':'gasoline_92','price':8.57,'unit':'元/升'},
+    {'type':'gasoline_95','price':9.15,'unit':'元/升'},
+    {'type':'gasoline_98','price':10.7,'unit':'元/升'}]}}
+  with mock.patch.object(sync,'fetch_json_api',side_effect=[bad,good]) as f:
+   self.assertEqual(sync.get_98_reference(NOW,{'92':8.57,'95':9.15},'2026-09-24')['p98'],10.7)
+   self.assertEqual(f.call_count,2)
+
 if __name__=='__main__':unittest.main()

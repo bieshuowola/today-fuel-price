@@ -183,6 +183,81 @@ def get_current(now):
     print('第三方 API 未获取可用数据：'+'；'.join(errors),file=sys.stderr)
     return None,None
 
+
+def fetch_json_api(url, payload=None, timeout=11):
+    """Fetch a publicly documented oil-price API; JSON is data, never code."""
+    headers={'User-Agent':'NingdeFuelDashboard/4.5 (+public price reference)',
+             'Accept':'application/json'}
+    content=None
+    if payload is not None:
+        content=json.dumps(payload,ensure_ascii=False).encode('utf-8')
+        headers['Content-Type']='application/json; charset=utf-8'
+    req=urllib.request.Request(url,data=content,headers=headers)
+    with urllib.request.urlopen(req,timeout=timeout) as response:
+        if response.status!=200:raise RuntimeError(f'HTTP {response.status}')
+        data=response.read(160_000)
+        if len(data)>=160_000:raise ValueError('第三方响应超过大小限制')
+    obj=json.loads(data.decode('utf-8'))
+    if not isinstance(obj,dict):raise ValueError('第三方响应不是JSON对象')
+    return obj
+
+def parse_98_reference(provider, obj, official_prices, official_day, now):
+    """Only accept fresh-for-current-cycle Fujian quotes corroborated by official 92/95."""
+    if provider=='ruseo':
+        if obj.get('success') is not True or not isinstance(obj.get('list'),list):
+            raise ValueError('澄曜API未返回有效油价列表')
+        rows=[r for r in obj['list'] if isinstance(r,dict) and '福建' in str(r.get('region',''))]
+        if len(rows)!=1:raise ValueError('澄曜API福建报价缺失或重复')
+        row=rows[0]
+        raw={'92':row.get('gasoline_92'),'95':row.get('gasoline_95'),'98':row.get('gasoline_98')}
+        region=row.get('region','')
+        stamp=row.get('date')
+        name='澄曜 API'
+        link='https://api.ruseo.cn/api-doc/oilprice'
+    elif provider=='apizero':
+        if obj.get('code')!=0 or not isinstance(obj.get('data'),dict):
+            raise ValueError('极数本源未返回成功结果')
+        data=obj['data']
+        raw={}
+        for item in data.get('prices',[]):
+            if not isinstance(item,dict) or item.get('type') not in ('gasoline_92','gasoline_95','gasoline_98'):continue
+            if item.get('unit')!='元/升':raise ValueError('第三方数据单位错误')
+            raw[item['type'][-2:]]=item.get('price')
+        region=data.get('province','')
+        stamp=data.get('update_date')
+        name='极数本源'
+        link='https://apizero.cn/aidocs/oil-price'
+    else:raise ValueError('未知的报价来源')
+    if '福建' not in str(region):raise ValueError('第三方报价地区不是福建')
+    source_day=iso_date(stamp)
+    if not source_day or not official_day or source_day<official_day or source_day>now.date().isoformat():
+        raise ValueError(f'第三方价格日期不在当前已核验调价周期内: {source_day}')
+    try:
+        p={k:float(raw[k]) for k in ('92','95','98')}
+    except (TypeError,ValueError,KeyError) as e:raise ValueError('第三方报价缺少有效的92/95/98价格') from e
+    if not valid_prices(p) or not p['95']+0.10 <= p['98'] <= p['95']+6.0:
+        raise ValueError('98号参考价格未通过合理范围检查')
+    if any(abs(p[k]-official_prices[k])>0.04 for k in ('92','95')):
+        raise ValueError('第三方92/95号报价与福建官方限价不一致')
+    return {'p98':round(p['98'],2),'source':name,'url':link,'price_date':source_day,
+            'checked_at':now.isoformat(timespec='seconds'),'region':'福建'}
+
+def get_98_reference(now,official_prices,official_day):
+    """Independent best-effort 98# feed: failure never affects official synchronization."""
+    sources=(('ruseo','https://api.ruseo.cn/api/oilprice',None),
+             ('apizero','https://v1.apizero.cn/api/oil-price',{'province':'福建'}))
+    errors=[]
+    for provider,url,payload in sources:
+        try:
+            raw=fetch_json_api(url,payload)
+            offer=parse_98_reference(provider,raw,official_prices,official_day,now)
+            print('98号来源已核对：',offer['source'],'原始数据日期',offer['price_date'])
+            return offer
+        except Exception as e:
+            errors.append(provider+': '+str(e))
+    print('98号第三方报价未通过核验，保留空值或旧快照：'+'；'.join(errors),file=sys.stderr)
+    return None
+
 def run():
     now=NOW();old={}
     if OUT.exists():
@@ -192,6 +267,15 @@ def run():
     if not history:raise RuntimeError('官方历史基线丢失')
     health=official_scan(history,now)
     current,forecast=get_current(now)
+    last_effective=max(k for k in history if k<now.date().isoformat())
+    verified_98=get_98_reference(now,history[last_effective]['p'],last_effective)
+    if verified_98:
+        # Preserve the authoritative 92/95 quotes. The extra 98 quote is a
+        # dated, provincial third-party observation — not a government ceiling.
+        p=dict(history[last_effective]['p'])
+        p['98']=verified_98['p98']
+        current={'p':p,'asof':now.date().isoformat(),'source':'98号第三方参考',
+                 'region':'福建宁德','ref98':verified_98}
     if current is None:
         cached=old.get('current')
         if isinstance(cached,dict):current=cached
@@ -207,7 +291,9 @@ def run():
     feed={'schema':5,'region':'福建宁德','generated_at':now.isoformat(timespec='seconds'),
           'history':[history[k] for k in sorted(history)],'latest_official_day':max(history),
           'official_index':INDEXES[0],'current':current,'forecast':forecast,'windows':windows,
-          'obs98':obs,'health':{**health,'api_ok':current is not None and current.get('asof')==now.date().isoformat(),
+          'obs98':obs,'health':{**health,'api98_ok':verified_98 is not None,
+                 'api98_source':verified_98['source'] if verified_98 else None,
+                 'api_ok':current is not None and current.get('asof')==now.date().isoformat(),
                  'api_latest_asof':current.get('asof') if current else None}}
     def fingerprint(obj):
         return {k:v for k,v in obj.items() if k!='generated_at' and k!='health'}
