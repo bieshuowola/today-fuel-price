@@ -113,4 +113,25 @@ class SyncTests(unittest.TestCase):
    self.assertEqual(sync.get_98_history(NOW,sync.load_history()),[])
 
 
+
+ def test_98_two_sources_must_agree_in_same_official_cycle(self):
+  first='<table>'
+  second='<table>'
+  for day,p92,p95,a,b in [('09-25',8.57,9.15,10.65,10.65),
+                          ('09-12',8.25,8.81,10.31,10.31),
+                          ('08-29',8.05,8.59,10.09,10.09),
+                          ('08-22',7.75,8.27,9.77,9.77),
+                          ('07-18',7.38,7.89,9.39,9.39),
+                          ('07-04',7.15,7.63,9.13,9.13),
+                          ('06-19',7.90,8.44,10.79,9.94)]:
+   first+=f'<tr><td>{day}</td><td>{p92}</td><td>{p95}</td><td>{a}</td></tr>'
+   second+=f'<tr><td>{day}</td><td>{p92}</td><td>{p95}</td><td>{b}</td></tr>'
+  first+='</table>';second+='</table>'
+  with mock.patch.object(sync,'fetch',side_effect=[first,second]):
+   rows=sync.get_98_history(NOW,sync.load_history())
+  self.assertEqual(len(rows),6)
+  self.assertNotIn('2026-06-19',[r['day'] for r in rows])
+  self.assertEqual(rows[-1]['p'],10.65)
+
+
 if __name__=='__main__':unittest.main()

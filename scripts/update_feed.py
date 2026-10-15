@@ -303,17 +303,35 @@ def parse_98_history_html(page,url,history,now):
     return sorted({r['day']:r for r in accepted}.values(),key=lambda x:x['day'])
 
 def get_98_history(now,history):
-    for url in ('https://www.autohome.com.cn/oil/350000.html',
-                'https://www.756657.com/fujian/'):
+    """Require matching 98 quotes from two public historical tables for the same official tariff cycle."""
+    urls=('https://www.autohome.com.cn/oil/350000.html',
+          'https://www.756657.com/fujian/')
+    values=[]
+    for url in urls:
         try:
-            found=parse_98_history_html(fetch(url,timeout=9),url,history,now)
-            if len(found)>=4:
-                print('98号历史核验成功:',len(found),'条，来源',url,'日期',found[0]['day'],found[-1]['day'])
-                return found
-            print('98号历史数据不足:',url,len(found),file=sys.stderr)
+            rows=parse_98_history_html(fetch(url,timeout=9),url,history,now)
+            print('98号历史候选:',len(rows),'来源',url)
+            values.append(rows)
         except Exception as e:
             print('98号历史来源暂时不可用:',url,str(e),file=sys.stderr)
-    return []
+            values.append([])
+    if min(map(len,values))<4:return []
+    def tariff_day(row):
+        older=[d for d in history if d<row['day']]
+        return max(older) if older else None
+    from_secondary={}
+    for row in values[1]:
+        from_secondary.setdefault(tariff_day(row),[]).append(row['p'])
+    trusted=[]
+    for row in values[0]:
+        corroboration=from_secondary.get(tariff_day(row),[])
+        if any(abs(row['p']-v)<=0.04 for v in corroboration):
+            trusted.append({**row,'source':'第三方多源参考','verified_by':list(urls)})
+        elif corroboration:
+            print('98号历史来源报价冲突，拒绝导入:',row['day'],file=sys.stderr)
+    if len(trusted)<4:return []
+    print('98号多源交叉核验成功:',len(trusted),'条；区间',trusted[0]['day'],trusted[-1]['day'])
+    return trusted
 
 def run():
     now=NOW();old={}
@@ -341,7 +359,7 @@ def run():
         if not isinstance(r,dict) or iso_date(r.get('day'))!=r.get('day'):continue
         try:value=float(r.get('p',0))
         except (ValueError,TypeError):continue
-        if 5<value<27:by_day[r['day']]={'day':r['day'],'p':value,'source':r.get('source','第三方参考'),'url':r.get('url','')}
+        if 5<value<27 and (r.get('source')!='第三方历史参考' or r.get('verified_by')):by_day[r['day']]={'day':r['day'],'p':value,'source':r.get('source','第三方参考'),'url':r.get('url',''),'verified_by':r.get('verified_by',[])}
     for row in get_98_history(now,history):
         previous=by_day.get(row['day'])
         if previous is None:by_day[row['day']]=row
