@@ -61,6 +61,30 @@ jobs:
           path: public
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Smoke-test published site and data feed
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, time, urllib.request
+          base='https://bieshuowola.github.io/today-fuel-price/'
+          for attempt in range(12):
+              try:
+                  req=urllib.request.Request(base+'?smoke='+str(int(time.time())),headers={'Cache-Control':'no-cache','User-Agent':'FuelPricePagesSmokeTest/1.0'})
+                  with urllib.request.urlopen(req,timeout=18) as resp:
+                      page=resp.read().decode('utf-8')
+                      if resp.status!=200 or '今日油价' not in page: raise RuntimeError('Unexpected HTML')
+                  req=urllib.request.Request(base+'data/latest.json?smoke='+str(int(time.time())),headers={'Cache-Control':'no-cache','User-Agent':'FuelPricePagesSmokeTest/1.0'})
+                  with urllib.request.urlopen(req,timeout=18) as resp:
+                      feed=json.load(resp)
+                      if resp.status!=200 or feed.get('schema')!=5 or len(feed.get('history',[]))<20:
+                          raise RuntimeError('Invalid public JSON feed')
+                  print('Verified public Pages URL, HTML and JSON; historical rows:',len(feed['history']))
+                  break
+              except Exception as exc:
+                  print(f'Site propagation attempt {attempt+1}/12: {exc}')
+                  if attempt==11: raise
+                  time.sleep(10)
+          PY
       - name: Flag failed sync without taking the previously usable website offline
         if: steps.sync.outcome == 'failure'
         run: |
