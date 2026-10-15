@@ -10,5 +10,63 @@ footer{font-size:10px;line-height:1.8;color:#a0a9b7;padding:17px 5px}.foot-links
 @media(max-width:650px){.wrap{width:calc(100% - 24px);padding:18px 0 28px}.top{margin:0 3px 17px}.brand-logo{height:39px;width:39px}.brand strong{font-size:17px}.place{font-size:11px}.tools{gap:7px}.refresh{height:39px;width:39px}.hero{padding:23px 20px 18px;border-radius:25px}.hero-top{flex-wrap:wrap}.h-title{font-size:22px}.segments{width:100%;order:2;margin-top:9px}.segments button{flex:1}.price-note{margin-top:22px}.amount strong{font-size:clamp(55px,13.5vw,73px)}.amount .currency{font-size:27px}.price-note,.delta-line{font-size:11px}.cycle{margin-top:16px;padding-top:16px}.cycle-date{font-size:14px}.cycle-count strong{font-size:13px}.status-row{font-size:10px}.chart-card,.history-card{padding:21px 18px;border-radius:24px;margin-top:13px}.section-title{font-size:17px}.periods button{font-size:10px;padding:7px 8px}.chart-shell{height:262px}.legend{margin-top:16px}.stat{padding-left:9px}.stat strong{font-size:17px}.stat-label{font-size:10px}.stat small{font-size:9px}.chart-foot{font-size:9px}.history-row{padding:13px 0}.asof{white-space:normal;max-width:42%}}
 @media(max-width:355px){.place{display:none}.amount strong{font-size:56px}.periods button{padding:7px 6px}.section-head{gap:7px}}
 
-/* 4.3 静默版本号，与页脚免责提示同一视觉层级 */
+/* 4.4 静默版本号，与页脚免责提示同一视觉层级 */
 .footer-version{margin-top:10px;color:#aeb6c2;font-size:10px;letter-spacing:.3px;font-weight:450;user-select:text}
+
+/* 4.4 — responsive typography, clear metadata groups, and crisp chart glyphs */
+.status-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start}
+.status-block{min-width:0}
+.status{align-items:center;line-height:1.45}
+.status #statusText{overflow-wrap:break-word;word-break:keep-all}
+.status-time{padding-left:15px;margin-top:5px;color:#a0aab9;font-size:10.5px;line-height:1.45;white-space:nowrap;font-variant-numeric:tabular-nums}
+.status-time[hidden],.price-kind[hidden]{display:none}
+.asof-block{min-width:0;text-align:right}
+.asof-label{display:block;font-size:10px;line-height:1.45;color:#9aa6b6;white-space:nowrap}
+.asof{display:block;margin-top:5px;text-align:right;white-space:nowrap;font-size:11px;font-weight:650;color:#71829a}
+.price-kind{margin-top:8px;font-size:10px;color:#9aa6b6}
+.prediction{display:flex;align-items:flex-start;flex-wrap:nowrap;gap:10px;line-height:1.55}
+.prediction-label{flex:none;color:#8795a8;font-size:11px;font-weight:650;white-space:nowrap}
+.prediction-values{display:flex;flex:1;min-width:0;align-items:baseline;flex-wrap:wrap;gap:3px 11px}
+.prediction-values strong,.prediction-values span{white-space:nowrap}
+.prediction-values span{font-size:10px;color:#98a4b4}
+.delta-context{word-break:keep-all}
+.cycle-count strong{white-space:nowrap;font-variant-numeric:tabular-nums}
+.section-intro{min-width:0}
+.chart-head .section-sub{white-space:nowrap;line-height:1.45}
+.chart-head .periods{flex:none}
+.chart-tip{border-radius:15px;padding:11px 13px;background:#243955;box-shadow:0 12px 30px rgba(27,49,83,.16);min-width:134px;max-width:calc(100% - 14px);font-variant-numeric:tabular-nums}
+.chart-tip.below{transform:translate(-50%,12%)}
+.chart-tip strong{font-size:17px;letter-spacing:-.35px}
+.chart-axis-label{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Microsoft YaHei",system-ui,sans-serif;font-size:11px;font-weight:500;letter-spacing:-.15px;font-variant-numeric:tabular-nums;fill:#9eabb9}
+.chart-axis-label.x-label{fill:#a8b2c0}
+.chart-foot{line-height:1.5;word-break:keep-all}
+.chart-foot span{min-width:0}
+.stat-grid{column-gap:0}
+.stat-label{white-space:nowrap}
+.stat small{word-break:keep-all;overflow-wrap:break-word}
+.history-sub,.history-day,.history-value{word-break:keep-all}
+@media(max-width:650px){
+ .status-row{grid-template-columns:minmax(0,1fr) auto;gap:9px}
+ .status #statusText{font-size:10.5px}
+ .asof-label,.asof{font-size:10px}
+ .status-time{font-size:10px}
+ .chart-head .section-sub{font-size:10px}
+ .chart-head .periods button{padding:8px 9px}
+ .chart-foot{display:flex;flex-direction:column;align-items:flex-start;gap:4px;font-size:10px}
+ .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:15px}
+ .stat{padding:0 0 0 17px}
+ .stat strong{font-size:22px;line-height:1.16;margin:6px 0 6px}
+ .stat small{font-size:10.5px;line-height:1.5}
+ .stat:nth-child(3){grid-column:1/-1;border-left:0;border-top:1px solid var(--line);padding:12px 0 0;display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:15px;row-gap:3px;align-items:end}
+ .stat:nth-child(3) .stat-label{grid-column:1;grid-row:1}
+ .stat:nth-child(3) strong{grid-column:1;grid-row:2;margin:0}
+ .stat:nth-child(3) small{grid-column:2;grid-row:2;text-align:right;align-self:end}
+}
+@media(max-width:350px){
+ .chart-head{flex-wrap:wrap}
+ .chart-head .periods{width:100%}
+ .chart-head .periods button{flex:1}
+ .status-row{gap:7px}
+ .status-time{font-size:9.5px}
+ .asof-label{font-size:9.5px}
+}

@@ -56,13 +56,13 @@ function periodEntries(grade,days){const all=ledger(grade),start=rangeStart(days
 function latestChange(grade){return changes(ledger(grade)).at(-1)||null;}
 function renderHeader(){const p=currentPrice();$('price').textContent=p.n==null?'—':cash(p.n);$('priceLabel').textContent=`${state.grade} 号汽油 · ${state.grade==='98'?'第三方参考价':'福建最高零售限价'} · 元/升`;
  const found=latestChange(state.grade),delta=$('delta'),ctx=$('deltaContext');delta.className='change';if(found){delta.textContent=`${found.delta>0?'↑ +':'↓ −'}${cash(Math.abs(found.delta))}`;delta.classList.add(found.delta>0?'up':'down');ctx.textContent=`最近价格变动 · ${fmtDay(found.publish)}${found.kind==='observed'?'（待官方核验）':''}`;}else{delta.textContent='暂无可核实变化';ctx.textContent=state.grade==='98'?'不提供未经核实的涨跌幅':'历史信息不足';}
- $('priceKind').textContent=p.kind==='official'?'官方公告价':p.kind==='observed'?'接口观察价 · 待核验':p.kind==='third-party'?'第三方实时参考价':'当前无可核实报价';
+ $('priceKind').textContent=p.kind==='official'?'官方公告价':p.kind==='observed'?'接口观察价 · 待核验':p.kind==='third-party'?'第三方实时参考价':'当前无可核实报价';$('priceKind').hidden=p.kind==='official';
  document.querySelectorAll('[data-grade]').forEach(el=>{const y=el.dataset.grade===state.grade;el.classList.toggle('active',y);el.setAttribute('aria-pressed',String(y))});document.querySelectorAll('[data-period]').forEach(el=>{const y=+el.dataset.period===state.period;el.classList.toggle('active',y);el.setAttribute('aria-pressed',String(y))});
  const ref=lastOfficial();let info='仅有内置历史快照 · 未接入在线同步';if(state.feedOnline)info=`官方历史已核对 · ${state.feedAt||'检查时间未知'}`;else if(state.feedSeen)info='官方历史同步过期或异常 · 数据可能滞后';else if(state.liveOnline)info=`仅第三方报价已获取 · ${state.live?.asof||'日期未知'}`;else if(state.status)info=state.status;
- $('statusText').textContent=info;
+ const infoSep=info.lastIndexOf(' · ');$('statusText').textContent=infoSep<0?info:info.slice(0,infoSep);$('statusTime').textContent=infoSep<0?'':info.slice(infoSep+3);$('statusTime').hidden=infoSep<0;
  const currentStale=ref&&millis(today())-millis(ref.day)>28*864e5&&!verifyObservation(state.live)&&!state.feedOnline;
  $('status').className='status '+(state.feedOnline?'good':currentStale?'bad':'warn');
- $('asof').textContent=ref?`最近官方价格变动 · ${fmtDay(ref.day)}`:'暂无官方历史';
+ $('asof').textContent=ref?fmtDay(ref.day):'暂无官方历史';
  $('mainHeading').textContent=currentStale?'历史参考油价':'当前油价';}
 function renderCalendar(){const now=new Date();const valid=state.windows.filter(x=>isDay(x)&&millis(addDays(x,1))>now.getTime()).sort();const next=valid[0]||null;
  if(!next){$('nextDate').textContent='等待公布';$('countdown').textContent='暂无日期';$('nextText').textContent='调价日历待更新';return;}
@@ -72,9 +72,9 @@ function renderCalendar(){const now=new Date();const valid=state.windows.filter(
 }
 function renderForecast(){const el=$('forecast'),f=state.forecast,valid=f&&isDay(f.window)&&isDay(f.asof)&&state.windows.includes(f.window)&&f.window===state.windows.find(w=>millis(addDays(w,1))>Date.now())&&millis(today())-millis(f.asof)<=3*864e5&&f.asof<=today();
  $('forecastLink').hidden=true;el.className='';
- if(!valid){el.textContent='下轮预测 · 暂无可靠的新预测';$('forecastNote').textContent='第三方预测仅供参考';return;}
- const m={'上调':'可能上涨','下调':'可能下降','搁浅':'可能持平','不调':'可能持平'};if(!m[f.direction]){el.textContent='下轮预测 · 暂无可靠的新预测';return;}
- el.textContent='下轮预测 · '+m[f.direction];el.className=f.direction==='上调'?'up':f.direction==='下调'?'down':'';
+ if(!valid){el.textContent='暂无可靠的新预测';$('forecastNote').textContent='第三方预测仅供参考';return;}
+ const m={'上调':'可能上涨','下调':'可能下降','搁浅':'可能持平','不调':'可能持平'};if(!m[f.direction]){el.textContent='暂无可靠的新预测';return;}
+ el.textContent=m[f.direction];el.className=f.direction==='上调'?'up':f.direction==='下调'?'down':'';
  $('forecastNote').textContent=Array.isArray(f.range)?`估计 ${f.range.map(cash).join('–')} 元/升 · ${f.asof}`:`${f.asof} · 非官方结果`;
  if(URL_OK(f.url)){$('forecastLink').href=f.url;$('forecastLink').hidden=false;}
 }
@@ -86,32 +86,33 @@ function renderStats(view){let title=({'90':'近 3 个月','180':'近半年','36
  const pts=view.points.filter(x=>Number.isFinite(x.p));if(state.grade==='98'||!view.coverage||!pts.length){for(const id of ['statMin','statMax','statDistance'])$(id).textContent='—';$('minAt').textContent=state.grade==='98'?'缺少连续历史':'该周期数据未完整核验';$('maxAt').textContent='不计算不可靠极值';$('distanceNote').textContent=view.stale?'官方记录需要更新':'等待完整官方记录';return;}
  const mn=Math.min(...pts.map(x=>x.p)),mx=Math.max(...pts.map(x=>x.p));const low=pts.find(x=>Math.abs(x.p-mn)<.005),high=pts.find(x=>Math.abs(x.p-mx)<.005);const current=currentPrice().n;
  $('statMin').textContent='¥'+cash(mn);$('statMax').textContent='¥'+cash(mx);$('statDistance').textContent=current==null?'—':`${current-mn>=0?'+':'−'}${cash(Math.abs(current-mn))}`;
- $('minAt').textContent=fmtDay(low.day)+(low.baseline?' · 期初在售':' 起');$('maxAt').textContent=fmtDay(high.day)+(high.baseline?' · 期初在售':' 起');$('distanceNote').textContent=view.uncertain?'含第三方观察 · 暂定统计':'当前高于周期最低价';}
+ $('minAt').textContent=fmtDay(low.day)+(low.baseline?'（期初在售）':' 起');$('maxAt').textContent=fmtDay(high.day)+(high.baseline?'（期初在售）':' 起');$('distanceNote').textContent=view.uncertain?'含第三方观察 · 暂定统计':'较周期最低价';}
 function monotonePath(dots){if(!dots.length)return '';if(dots.length===1)return `M ${dots[0].x} ${dots[0].y}`;
  const n=dots.length,ds=[],slopes=[];for(let i=0;i<n-1;i++)ds.push((dots[i+1].y-dots[i].y)/(dots[i+1].x-dots[i].x));
  for(let i=0;i<n;i++){if(i===0)slopes[i]=ds[0];else if(i===n-1)slopes[i]=ds[n-2];else if(ds[i-1]*ds[i]<=0)slopes[i]=0;else slopes[i]=2/(1/ds[i-1]+1/ds[i]);}
  let path=`M ${dots[0].x.toFixed(2)} ${dots[0].y.toFixed(2)}`;
  for(let i=0;i<n-1;i++){const a=dots[i],b=dots[i+1],dx=b.x-a.x;path+=` C ${(a.x+dx/3).toFixed(2)} ${(a.y+slopes[i]*dx/3).toFixed(2)}, ${(b.x-dx/3).toFixed(2)} ${(b.y-slopes[i+1]*dx/3).toFixed(2)}, ${b.x.toFixed(2)} ${b.y.toFixed(2)}`;}
  return path;}
-function renderChart(view){$('legendText').textContent=state.grade+' 号汽油';$('coverage').textContent=state.grade==='98'?'98 号暂无可核实连续历史':view.stale?'部分数据可能过期 · 等待同步':view.uncertain?'含待核实观察节点 · 统计仅供参考':`按实际日期间隔展示 · ${fmtRangeDay(view.start,state.period)}—${fmtRangeDay(view.end,state.period)}`;
- const svg=$('chart'),shell=$('chartShell'),tip=$('tip');tip.classList.remove('visible');let pts=view.points;if(pts.length<2){svg.innerHTML=`<text x="215" y="140" text-anchor="middle" font-size="14" fill="#98a5b5">${state.grade==='98'?'98 号历史记录仍不足以画出趋势':'尚无足够历史记录'}</text>`;return;}
- const mobile=shell.clientWidth<520,W=mobile?420:900,H=mobile?270:310,L=mobile?44:48,R=mobile?12:22,T=30,B=40,ww=W-L-R,hh=H-T-B;
+function renderChart(view){$('legendText').textContent=state.grade+' 号汽油';$('coverage').textContent=state.grade==='98'?'98 号暂无可核实连续历史':view.stale?'部分数据可能过期 · 等待同步':view.uncertain?'含待核实观察节点 · 统计仅供参考':`日期范围 · ${fmtRangeDay(view.start,state.period)}—${fmtRangeDay(view.end,state.period)}`;
+ const svg=$('chart'),shell=$('chartShell'),tip=$('tip'),W=shell.clientWidth||420,H=shell.clientHeight||270,mobile=W<520;tip.classList.remove('visible','below');let pts=view.points;if(pts.length<2){svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle" class="chart-axis-label">${state.grade==='98'?'98 号历史记录仍不足以画出趋势':'尚无足够历史记录'}</text>`;return;}
+ // Draw in real CSS-pixel coordinates to keep circular markers and type undistorted.
+ const L=mobile?40:52,R=mobile?10:18,T=27,B=39,ww=W-L-R,hh=H-T-B;
  const mn=Math.min(...pts.map(p=>p.p)),mx=Math.max(...pts.map(p=>p.p)),margin=Math.max(.14,(mx-mn)*.22),bottom=mn-margin,top=mx+margin;
  const x=p=>L+ww*(millis(p.day)-millis(view.start))/Math.max(1,millis(view.end)-millis(view.start));const y=v=>T+(top-v)/(top-bottom)*hh;
  const dots=pts.map(p=>({...p,x:x(p),y:y(p.p)}));const path=monotonePath(dots);
  // Vertical blue area gradient under the real-price curve. SVG gradient is inline
  // so it also works in Android's file:// viewer without external styles or scripts.
  let html=`<defs><linearGradient id="fuelAreaGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4896fa" stop-opacity=".41"/><stop offset="48%" stop-color="#6aafff" stop-opacity=".25"/><stop offset="100%" stop-color="#d6e7ff" stop-opacity=".075"/></linearGradient></defs>`;
- for(let i=0;i<4;i++){const yy=T+hh*i/3;html+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="#edf0f4" stroke-dasharray="3 7"/><text x="${L-8}" y="${yy+4}" text-anchor="end" fill="#a2acb9" font-size="12">${cash(top-(top-bottom)*i/3)}</text>`;}
- for(let i=0;i<4;i++){const t=millis(view.start)+i*(millis(view.end)-millis(view.start))/3,dt=new Date(t+8*36e5),d=`${dt.getUTCMonth()+1}/${two(dt.getUTCDate())}`;html+=`<text x="${L+i*ww/3}" y="${H-12}" text-anchor="${i===0?'start':i===3?'end':'middle'}" fill="#a2acb9" font-size="12">${d}</text>`;}
+ for(let i=0;i<4;i++){const yy=T+hh*i/3;html+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="#edf0f4" stroke-dasharray="3 7"/><text class="chart-axis-label" x="${L-9}" y="${yy+4}" text-anchor="end">${cash(top-(top-bottom)*i/3)}</text>`;}
+ for(let i=0;i<4;i++){const t=millis(view.start)+i*(millis(view.end)-millis(view.start))/3,dt=new Date(t+8*36e5),d=`${dt.getUTCMonth()+1}/${two(dt.getUTCDate())}`;html+=`<text class="chart-axis-label x-label" x="${L+i*ww/3}" y="${H-12}" text-anchor="${i===0?'start':i===3?'end':'middle'}">${d}</text>`;}
  html+=`<path d="${path} L ${dots.at(-1).x.toFixed(2)} ${H-B} L ${dots[0].x.toFixed(2)} ${H-B} Z" fill="url(#fuelAreaGradient)"/><path d="${path}" fill="none" stroke="#297cf2" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/>`;
  const significant=dots.filter((d,i)=>!d.carried&&!d.baseline);const pointDots=significant.length>31?significant.filter((_,i)=>i%2===0||i===significant.length-1):significant;
  for(const p of pointDots){const last=p===significant.at(-1);html+=`<circle cx="${p.x}" cy="${p.y}" r="${last?6:4.7}" fill="#297cf2" fill-opacity="${last?.23:.18}"/><circle cx="${p.x}" cy="${p.y}" r="${last?3.1:2.25}" fill="#297cf2"/>`;}
- html+=`<line id="crossV" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="#7b8da5" stroke-width="1.3" opacity="0"/><line id="crossH" x1="${L}" x2="${W-R}" y1="0" y2="0" stroke="#c4d0dd" stroke-dasharray="4 5" opacity="0"/><circle id="crossDot" cx="0" cy="0" r="6" fill="#3478ee" stroke="white" stroke-width="2.5" opacity="0"/>`;
- svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML=html;svg.setAttribute('aria-label',`${state.grade}号汽油${state.period}天范围价格变化`);
- function show(i){const p=dots[i],bound=shell.getBoundingClientRect(),v=svg.querySelector('#crossV'),h=svg.querySelector('#crossH'),circle=svg.querySelector('#crossDot');v.setAttribute('x1',p.x);v.setAttribute('x2',p.x);v.setAttribute('opacity','1');h.setAttribute('y1',p.y);h.setAttribute('y2',p.y);h.setAttribute('opacity','1');circle.setAttribute('cx',p.x);circle.setAttribute('cy',p.y);circle.setAttribute('opacity','1');tip.style.left=`${Math.max(69,Math.min(bound.width-69,p.x/W*bound.width))}px`;tip.style.top=`${Math.max(68,p.y/H*bound.height-5)}px`;$('tipDate').textContent=fmtDay(p.publish||p.day);$('tipPrice').textContent='¥'+cash(p.p)+' / 升';$('tipNote').textContent=p.baseline?'期初在售':p.carried?'沿用上次价格':p.kind==='observed'?'第三方观察（未核验）':'官方调整价';tip.classList.add('visible');}
+ html+=`<line id="crossV" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="#7b8da5" stroke-width="1.3" opacity="0"/><line id="crossH" x1="${L}" x2="${W-R}" y1="0" y2="0" stroke="#c4d0dd" stroke-dasharray="4 5" opacity="0"/><circle id="crossHalo" cx="0" cy="0" r="7" fill="#3478ee" fill-opacity=".19" opacity="0"/><circle id="crossDot" cx="0" cy="0" r="3.5" fill="#3478ee" stroke="white" stroke-width="1.3" opacity="0"/>`;
+ svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('preserveAspectRatio','xMidYMid meet');svg.innerHTML=html;svg.setAttribute('aria-label',`${state.grade}号汽油${state.period}天范围价格变化`);
+ function show(i){const p=dots[i],bound=shell.getBoundingClientRect(),v=svg.querySelector('#crossV'),h=svg.querySelector('#crossH'),circle=svg.querySelector('#crossDot');v.setAttribute('x1',p.x);v.setAttribute('x2',p.x);v.setAttribute('opacity','1');h.setAttribute('y1',p.y);h.setAttribute('y2',p.y);h.setAttribute('opacity','1');circle.setAttribute('cx',p.x);circle.setAttribute('cy',p.y);circle.setAttribute('opacity','1');const halo=svg.querySelector('#crossHalo');halo.setAttribute('cx',p.x);halo.setAttribute('cy',p.y);halo.setAttribute('opacity','1');tip.classList.toggle('below',p.y<105);tip.style.left=`${Math.max(69,Math.min(bound.width-69,p.x/W*bound.width))}px`;tip.style.top=`${p.y<105?p.y/H*bound.height+8:p.y/H*bound.height-8}px`;$('tipDate').textContent=fmtDay(p.publish||p.day);$('tipPrice').textContent='¥'+cash(p.p)+' / 升';$('tipNote').textContent=p.baseline?'期初在售':p.carried?'沿用上次价格':p.kind==='observed'?'第三方观察（未核验）':'官方调整价';tip.classList.add('visible');}
  const choose=e=>{const rect=shell.getBoundingClientRect(),coord=(e.clientX-rect.left)/rect.width*W;let ix=0;dots.forEach((d,i)=>{if(Math.abs(d.x-coord)<Math.abs(dots[ix].x-coord))ix=i});show(ix)};
- shell.onpointermove=choose;shell.onpointerdown=choose;shell.onpointerleave=()=>{tip.classList.remove('visible');['crossV','crossH','crossDot'].forEach(id=>svg.querySelector('#'+id)?.setAttribute('opacity','0'));};
+ shell.onpointermove=choose;shell.onpointerdown=choose;shell.onpointerleave=()=>{tip.classList.remove('visible');['crossV','crossH','crossHalo','crossDot'].forEach(id=>svg.querySelector('#'+id)?.setAttribute('opacity','0'));};
 }
 function render(){renderHeader();renderCalendar();renderForecast();renderRecent();const view=periodEntries(state.grade,state.period);renderChart(view);renderStats(view);}
 function toast(msg){const n=$('toast');n.textContent=msg;n.classList.add('show');clearTimeout(toast.handle);toast.handle=setTimeout(()=>n.classList.remove('show'),3400);}
