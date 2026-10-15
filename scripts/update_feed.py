@@ -258,6 +258,63 @@ def get_98_reference(now,official_prices,official_day):
     print('98号第三方报价未通过核验，保留空值或旧快照：'+'；'.join(errors),file=sys.stderr)
     return None
 
+
+class HistoryTableReader(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.rows=[];self.row=None;self.cell=None
+    def handle_starttag(self,tag,attrs):
+        if tag=='tr':self.row=[]
+        elif tag in ('td','th') and self.row is not None:self.cell=[]
+    def handle_data(self,value):
+        if self.cell is not None:self.cell.append(value)
+    def handle_endtag(self,tag):
+        if tag in ('td','th') and self.cell is not None and self.row is not None:
+            self.row.append(re.sub(r'\s+',' ',''.join(self.cell)).strip());self.cell=None
+        elif tag=='tr' and self.row is not None:
+            self.rows.append(self.row);self.row=None;self.cell=None
+
+def parse_98_history_html(page,url,history,now):
+    """Only trust rows whose 92/95 match effective official Fujian prices."""
+    parser=HistoryTableReader();parser.feed(page)
+    accepted=[]
+    for cells in parser.rows:
+        if len(cells)<4:continue
+        m=re.search(r'(?<!\d)(?:(20\d{2})[-/])?(\d{1,2})[-/](\d{1,2})(?!\d)',cells[0])
+        if not m:continue
+        year=int(m[1] or now.year);mon=int(m[2]);day=int(m[3])
+        if m[1] is None and (mon,day)>(now.month,now.day):year-=1
+        try:at=dt.date(year,mon,day)
+        except ValueError:continue
+        if at>now.date() or at<now.date()-dt.timedelta(days=740):continue
+        values=[]
+        for cell in cells[1:4]:
+            n=re.search(r'(?<!\d)(\d{1,2}(?:\.\d{1,2})?)(?!\d)',cell)
+            if not n:break
+            values.append(float(n[1]))
+        if len(values)!=3:continue
+        p92,p95,p98=values
+        effective=[day for day in history if day<at.isoformat()]
+        if not effective:continue
+        official=history[max(effective)]['p']
+        if abs(p92-official['92'])>0.04 or abs(p95-official['95'])>0.04:continue
+        if not p95+.10<=p98<=p95+6:continue
+        accepted.append({'day':at.isoformat(),'p':round(p98,2),'source':'第三方历史参考','url':url})
+    return sorted({r['day']:r for r in accepted}.values(),key=lambda x:x['day'])
+
+def get_98_history(now,history):
+    for url in ('https://www.autohome.com.cn/oil/350000.html',
+                'https://www.756657.com/fujian/'):
+        try:
+            found=parse_98_history_html(fetch(url,timeout=9),url,history,now)
+            if len(found)>=4:
+                print('98号历史核验成功:',len(found),'条，来源',url,'日期',found[0]['day'],found[-1]['day'])
+                return found
+            print('98号历史数据不足:',url,len(found),file=sys.stderr)
+        except Exception as e:
+            print('98号历史来源暂时不可用:',url,str(e),file=sys.stderr)
+    return []
+
 def run():
     now=NOW();old={}
     if OUT.exists():
@@ -279,12 +336,22 @@ def run():
     if current is None:
         cached=old.get('current')
         if isinstance(cached,dict):current=cached
-    obs=old.get('obs98') or []
-    obs=[r for r in obs if isinstance(r,dict) and iso_date(r.get('day'))==r.get('day') and 5<float(r.get('p',0))<27]
-    if current and '98' in current.get('p',{}) and current['asof'] and 5<float(current['p']['98'])<27:
+    by_day={}
+    for r in old.get('obs98') or []:
+        if not isinstance(r,dict) or iso_date(r.get('day'))!=r.get('day'):continue
+        try:value=float(r.get('p',0))
+        except (ValueError,TypeError):continue
+        if 5<value<27:by_day[r['day']]={'day':r['day'],'p':value,'source':r.get('source','第三方参考'),'url':r.get('url','')}
+    for row in get_98_history(now,history):
+        previous=by_day.get(row['day'])
+        if previous is None:by_day[row['day']]=row
+        elif abs(previous['p']-row['p'])>0.04:
+            print('拒绝98号历史数据冲突:',row['day'],file=sys.stderr)
+    if current and '98' in current.get('p',{}) and current.get('asof'):
         day=current['asof'];value=float(current['p']['98'])
-        if not obs or (day>obs[-1]['day'] and abs(value-obs[-1]['p'])>=.005):obs.append({'day':day,'p':value})
-    obs=obs[-180:]
+        if 5<value<27 and (verified_98 is not None or day not in by_day):
+            by_day[day]={'day':day,'p':value,'source':verified_98['source'] if verified_98 else '第三方参考','url':verified_98['url'] if verified_98 else ''}
+    obs=[by_day[d] for d in sorted(by_day)][-180:]
     windows=[]
     if forecast:windows=[forecast['window']]
     windows=sorted(set(windows+['2026-10-29','2026-11-12','2026-11-26','2026-12-10','2026-12-24']))

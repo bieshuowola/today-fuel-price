@@ -98,4 +98,19 @@ class SyncTests(unittest.TestCase):
    self.assertEqual(sync.get_98_reference(NOW,{'92':8.57,'95':9.15},'2026-09-24')['p98'],10.7)
    self.assertEqual(f.call_count,2)
 
+
+ def test_98_historical_rows_need_official_tariff_agreement(self):
+  page=('<table><tr><th>日期</th><th>92</th><th>95</th><th>98</th></tr>'
+        '<tr><td>09-25</td><td>8.57</td><td>9.15</td><td>10.65</td></tr>'
+        '<tr><td>09-12</td><td>8.25</td><td>8.81</td><td>10.31</td></tr>'
+        '<tr><td>09-14</td><td>8.57</td><td>9.15</td><td>10.65</td></tr>'
+        '<tr><td>09-25</td><td>8.57</td><td>9.15</td><td>10.65</td></tr></table>')
+  obs=sync.parse_98_history_html(page,'https://www.autohome.com.cn/oil/350000.html',sync.load_history(),NOW)
+  self.assertEqual([(r['day'],r['p']) for r in obs],[('2026-09-12',10.31),('2026-09-25',10.65)])
+
+ def test_98_history_scraper_failure_is_nonfatal(self):
+  with mock.patch.object(sync,'fetch',side_effect=TimeoutError('blocked')):
+   self.assertEqual(sync.get_98_history(NOW,sync.load_history()),[])
+
+
 if __name__=='__main__':unittest.main()
