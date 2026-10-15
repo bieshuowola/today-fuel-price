@@ -66,3 +66,4 @@ jobs:
         run: |
           echo 'Official sync failed. Previous data was published unchanged and will show an expired status.'
           exit 1
+# Publish retry after GitHub Pages was enabled; preserve the hourly sync schedule.
