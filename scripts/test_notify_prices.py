@@ -48,7 +48,7 @@ class NotificationTests(unittest.TestCase):
         response.read.return_value = json.dumps({
             'event': 'message', 'topic': topic, 'id': 'ack-001'
         }).encode('utf-8')
-        opener = mock.Mock()
+        opener = mock.MagicMock()
         opener.return_value.__enter__.return_value = response
         payload = {'title': '今日油价 · 测试',
                    'message': '通知图标测试，不是真实调价', 'priority': 4}
