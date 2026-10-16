@@ -155,7 +155,7 @@ def reference_message(notice_day, ref, prior):
              f'报价日期：{day.month}月{day.day}日',
              f'数据来源：{ref["source"]}',
              '非官方限价，实际以加油站报价为准']
-    return {'title': '今日油价 · 98号参考价更新', 'message': '\n'.join(lines), 'priority': 3}
+    return {'title': '今日油价 · 98号参考价更新', 'message': '\n'.join(lines), 'priority': 4}
 
 
 def publish(topic, payload, opener=urllib.request.urlopen):

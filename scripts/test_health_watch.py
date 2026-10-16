@@ -33,6 +33,7 @@ class WatchTests(unittest.TestCase):
             self.assertTrue(watch.run(now=NOW,**options))
             self.assertFalse(watch.run(now=NOW+dt.timedelta(hours=3),**options))
             sender.assert_called_once()
+            self.assertEqual(sender.call_args[0][1]['priority'],4)
             self.assertTrue(path.exists())
 
     def test_network_error_is_reported(self):

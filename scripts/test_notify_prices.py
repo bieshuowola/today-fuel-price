@@ -77,6 +77,7 @@ class NotificationTests(unittest.TestCase):
             self.assertEqual(n.run(feed_path=path,cursor_path=cursor,topic='test-topic-1234',sender=sender),['official'])
             message=sender.call_args[0][1]
             self.assertEqual(message['title'],'今日油价 · 油价上调')
+            self.assertEqual(message['priority'],4)
             self.assertIn('92号：8.20元/升（↑0.20元）',message['message'])
             self.assertIn('95号：8.72元/升（↑0.22元）',message['message'])
             self.assertIn('00:00起执行',message['message'])
@@ -99,6 +100,7 @@ class NotificationTests(unittest.TestCase):
             sender=mock.Mock(return_value='ok')
             self.assertEqual(n.run(feed_path=path,cursor_path=cursor,topic='test-topic-1234',sender=sender),['98'])
             self.assertIn('98号：9.88元/升',sender.call_args[0][1]['message'])
+            self.assertEqual(sender.call_args[0][1]['priority'],4)
             self.assertEqual(n.run(feed_path=path,cursor_path=cursor,topic='test-topic-1234',sender=sender),[])
             sender.assert_called_once()
 
