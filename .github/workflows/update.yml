@@ -22,6 +22,7 @@ permissions:
   id-token: write
 concurrency:
   group: fuel-price-site
+  queue: max
   cancel-in-progress: false
 jobs:
   sync-and-publish:
@@ -70,7 +71,7 @@ jobs:
             echo 'No changed public dataset to commit.'
           else
             git commit -m 'Update Fujian fuel prices'
-            git push
+            bash scripts/git_push_retry.sh
           fi
       - name: Publish verified fuel-price notifications
         id: notify
@@ -94,7 +95,7 @@ jobs:
             echo 'Notification checkpoint unchanged.'
           else
             git commit -m 'Record acknowledged fuel-price notification'
-            git push
+            bash scripts/git_push_retry.sh
           fi
       - name: Prepare minimal public site
         shell: bash

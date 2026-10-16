@@ -1,0 +1,50 @@
+name: Check long-term fuel-site health
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/health-watch.yml'
+      - 'scripts/health_watch.py'
+      - 'scripts/test_health_watch.py'
+  workflow_dispatch:
+  schedule:
+    - cron: '43 3,11,19 * * *'
+permissions:
+  contents: write
+concurrency:
+  group: fuel-price-site
+  queue: max
+  cancel-in-progress: false
+jobs:
+  check-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test failure detection and alert deduplication
+        run: python -m unittest discover -s scripts -p 'test_health_watch.py' -v
+      - name: Inspect public feed and alert when stale
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python scripts/health_watch.py
+      - name: Save watchdog alert checkpoint when needed
+        shell: bash
+        run: |
+          if [ ! -f data/watchdog_state.json ]; then
+            echo 'No watchdog alert issued.'
+            exit 0
+          fi
+          git config user.name 'fuel-price-bot'
+          git config user.email 'fuel-price-bot@users.noreply.github.com'
+          git add data/watchdog_state.json
+          if git diff --cached --quiet; then
+            echo 'No new watchdog alert.'
+          else
+            git commit -m 'Record oil-price watchdog alert'
+            bash scripts/git_push_retry.sh
+          fi
