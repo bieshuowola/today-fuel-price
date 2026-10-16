@@ -215,7 +215,11 @@ def run(dry_run=False, feed_path=FEED, cursor_path=CURSOR, topic=None, sender=pu
             cursor['last_98_cycle'] = newest
         cursor['last_official_day'] = newest
     elif last98 != newest and ref is not None:
-        events.append(('98', reference_message(newest, ref, prior98)))
+        if prior98 is None or ref['value'] != prior98:
+            events.append(('98', reference_message(newest, ref, prior98)))
+        else:
+            # Fresh quotation with the same 98 price is not a price change.
+            cursor['last_98_cycle'] = newest
 
     if dry_run:
         for kind, event in events:
@@ -223,7 +227,7 @@ def run(dry_run=False, feed_path=FEED, cursor_path=CURSOR, topic=None, sender=pu
         return events
 
     if not events:
-        if official_changed:
+        if official_changed or cursor['last_98_cycle'] != last98:
             save_cursor(cursor, cursor_path)
         print('No new verified fuel-price event.')
         return []
