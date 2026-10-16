@@ -41,7 +41,7 @@ class NotificationTests(unittest.TestCase):
         path.write_text(json.dumps(feed,ensure_ascii=False),encoding='utf-8')
         return feed,old,new,path,cursor
 
-    def test_publish_uses_site_waterdrop_png(self):
+    def test_publish_preserves_default_ntfy_icon_and_click(self):
         topic = 'test-topic-1234'
         response = mock.MagicMock()
         response.status = 200
@@ -51,11 +51,11 @@ class NotificationTests(unittest.TestCase):
         opener = mock.MagicMock()
         opener.return_value.__enter__.return_value = response
         payload = {'title': '今日油价 · 测试',
-                   'message': '通知图标测试，不是真实调价', 'priority': 4}
+                   'message': '默认通知图标回归测试', 'priority': 4}
         self.assertEqual(n.publish(topic, payload, opener=opener), 'ack-001')
         request = opener.call_args.args[0]
         sent = json.loads(request.data.decode('utf-8'))
-        self.assertEqual(sent['icon'], n.SITE_URL + 'icons/icon-192.png')
+        self.assertNotIn('icon', sent)
         self.assertEqual(sent['click'], n.SITE_URL)
         self.assertEqual(sent['topic'], topic)
         self.assertEqual(sent['title'], payload['title'])

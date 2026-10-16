@@ -24,7 +24,6 @@ CURSOR = ROOT / 'data/notify_state.json'
 LOCAL_TZ = ZoneInfo('Asia/Shanghai')
 NTFY_URL = 'https://ntfy.sh/'
 SITE_URL = 'https://bieshuowola.github.io/today-fuel-price/'
-ICON_URL = SITE_URL + 'icons/icon-192.png'
 
 
 def amount(value):
@@ -162,7 +161,7 @@ def reference_message(notice_day, ref, prior):
 def publish(topic, payload, opener=urllib.request.urlopen):
     if not isinstance(topic, str) or not 10 <= len(topic) <= 100 or not all(c.isascii() and (c.isalnum() or c in '-_') for c in topic):
         raise ValueError('invalid ntfy topic')
-    data = {'topic': topic, **payload, 'click': SITE_URL, 'icon': ICON_URL}
+    data = {'topic': topic, **payload, 'click': SITE_URL}
     req = urllib.request.Request(NTFY_URL,
         data=json.dumps(data, ensure_ascii=False).encode('utf-8'),
         headers={'Content-Type': 'application/json; charset=utf-8', 'User-Agent': 'NingdeFuelAlert/1.0'}, method='POST')
