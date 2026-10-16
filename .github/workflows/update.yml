@@ -72,6 +72,30 @@ jobs:
             git commit -m 'Update Fujian fuel prices'
             git push
           fi
+      - name: Publish verified fuel-price notifications
+        id: notify
+        if: steps.sync.outcome == 'success'
+        continue-on-error: true
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        shell: bash
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then
+            echo "::warning::NTFY_TOPIC repository secret is missing; no push notification sent."
+            exit 0
+          fi
+          python scripts/notify_prices.py
+      - name: Persist notification checkpoint after acknowledged delivery
+        if: always() && steps.sync.outcome == 'success'
+        shell: bash
+        run: |
+          git add data/notify_state.json
+          if git diff --cached --quiet; then
+            echo 'Notification checkpoint unchanged.'
+          else
+            git commit -m 'Record acknowledged fuel-price notification'
+            git push
+          fi
       - name: Prepare minimal public site
         shell: bash
         run: |
@@ -119,6 +143,11 @@ jobs:
                   if attempt==11: raise
                   time.sleep(10)
           PY
+      - name: Flag notification delivery failure after publishing website
+        if: steps.notify.outcome == 'failure'
+        run: |
+          echo "::error::ntfy notification failed; checkpoint is intentionally pending for next scheduled retry."
+          exit 1
       - name: Flag failed sync without taking the previously usable website offline
         if: steps.sync.outcome == 'failure'
         run: |
