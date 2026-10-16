@@ -118,6 +118,17 @@ class NotificationTests(unittest.TestCase):
             self.assertEqual(json.loads(cursor.read_text())['last_official_day'],new)
             sender.assert_not_called()
 
+    def test_unchanged_new_cycle_98_quote_is_not_an_alert(self):
+        with TemporaryDirectory() as d:
+            feed,old,new,path,cursor=self.case(d,include98=True)
+            feed['obs98'][0]['p']=9.88
+            path.write_text(json.dumps(feed,ensure_ascii=False))
+            n.save_cursor({'schema':1,'last_official_day':new,'last_98_cycle':old},cursor)
+            sender=mock.Mock()
+            self.assertEqual(n.run(feed_path=path,cursor_path=cursor,topic='test-topic-1234',sender=sender),[])
+            self.assertEqual(json.loads(cursor.read_text())['last_98_cycle'],new)
+            sender.assert_not_called()
+
     def test_stale_verification_rejected(self):
         with TemporaryDirectory() as d:
             feed,old,new,path,cursor=self.case(d)
