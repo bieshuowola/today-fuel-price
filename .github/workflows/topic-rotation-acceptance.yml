@@ -1,0 +1,42 @@
+name: One-time ntfy topic rotation acceptance
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/topic-rotation-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Send harmless end-to-end notification
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, json, urllib.request
+          topic = os.environ.get("NTFY_TOPIC", "")
+          if not topic:
+              raise SystemExit("NTFY_TOPIC secret missing")
+          payload = {
+              "topic": topic,
+              "title": "今日油价 · 新主题验收",
+              "message": "【测试通知】新 ntfy 主题切换验证；非真实油价调整，无需操作。",
+              "priority": 3,
+              "click": "https://bieshuowola.github.io/today-fuel-price/"
+          }
+          req = urllib.request.Request(
+              "https://ntfy.sh/",
+              data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+              headers={"Content-Type": "application/json; charset=utf-8"},
+              method="POST")
+          with urllib.request.urlopen(req, timeout=18) as resp:
+              result = json.load(resp)
+              if resp.status != 200 or result.get("event") != "message" or result.get("topic") != topic or not result.get("id"):
+                  raise SystemExit("ntfy failed to acknowledge test message")
+              print("New topic test accepted by ntfy; message ID:", result["id"])
+          PY
