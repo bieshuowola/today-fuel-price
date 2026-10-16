@@ -66,8 +66,8 @@ def load_feed(path=FEED):
         raise ValueError('official verification is stale or missing')
     now = dt.datetime.now(LOCAL_TZ)
     checked = dt.datetime.fromisoformat(health['checked_at'])
-    if checked.tzinfo is None or not 0 <= (now-checked).total_seconds() < 7200:
-        raise ValueError('dataset was not verified in the last 2 hours')
+    if checked.tzinfo is None or not 0 <= (now-checked).total_seconds() < 28800:
+        raise ValueError('dataset was not verified in the last 8 hours')
     return feed, official, newest
 
 

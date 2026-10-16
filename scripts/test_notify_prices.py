@@ -132,9 +132,9 @@ class NotificationTests(unittest.TestCase):
     def test_stale_verification_rejected(self):
         with TemporaryDirectory() as d:
             feed,old,new,path,cursor=self.case(d)
-            feed['health']['checked_at']=(dt.datetime.now(TZ)-dt.timedelta(hours=4)).isoformat()
+            feed['health']['checked_at']=(dt.datetime.now(TZ)-dt.timedelta(hours=10)).isoformat()
             path.write_text(json.dumps(feed))
-            with self.assertRaisesRegex(ValueError,'2 hours'):
+            with self.assertRaisesRegex(ValueError,'8 hours'):
                 n.run(feed_path=path,cursor_path=cursor,topic='test-topic-1234')
 
     def test_downward_adjustment(self):

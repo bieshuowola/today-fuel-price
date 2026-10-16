@@ -81,8 +81,8 @@ jobs:
         shell: bash
         run: |
           if [ -z "$NTFY_TOPIC" ]; then
-            echo "::warning::NTFY_TOPIC repository secret is missing; no push notification sent."
-            exit 0
+            echo "::error::NTFY_TOPIC repository secret is missing; notification delivery is disabled."
+            exit 1
           fi
           python scripts/notify_prices.py
       - name: Persist notification checkpoint after acknowledged delivery
