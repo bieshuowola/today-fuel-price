@@ -1,7 +1,7 @@
 {
   "schema": 5,
   "region": "福建宁德",
-  "generated_at": "2026-10-20T23:43:47+08:00",
+  "generated_at": "2026-10-21T00:42:18+08:00",
   "history": [
     {
       "day": "2023-01-03",
@@ -696,7 +696,7 @@
       "95": 9.15,
       "98": 10.65
     },
-    "asof": "2026-10-20",
+    "asof": "2026-10-21",
     "source": "98号第三方参考",
     "region": "福建宁德",
     "ref98": {
@@ -704,7 +704,7 @@
       "source": "极数本源",
       "url": "https://apizero.cn/aidocs/oil-price",
       "price_date": "2026-10-20",
-      "checked_at": "2026-10-20T23:43:47+08:00",
+      "checked_at": "2026-10-21T00:42:18+08:00",
       "region": "福建"
     }
   },
@@ -819,21 +819,28 @@
       "day": "2026-10-20",
       "p": 10.65,
       "source": "极数本源",
+      "url": "https://apizero.cn/aidocs/oil-price",
+      "verified_by": []
+    },
+    {
+      "day": "2026-10-21",
+      "p": 10.65,
+      "source": "极数本源",
       "url": "https://apizero.cn/aidocs/oil-price"
     }
   ],
   "health": {
-    "checked_at": "2026-10-20T23:43:47+08:00",
+    "checked_at": "2026-10-21T00:42:18+08:00",
     "index_ok": true,
     "link_count": 76,
     "source_count": 4,
     "source_errors": [],
     "verified_count": 1,
     "latest_official_day": "2026-09-24",
-    "latest_official_age_days": 26,
+    "latest_official_age_days": 27,
     "api98_ok": true,
     "api98_source": "极数本源",
     "api_ok": true,
-    "api_latest_asof": "2026-10-20"
+    "api_latest_asof": "2026-10-21"
   }
 }
