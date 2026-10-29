@@ -1,7 +1,7 @@
 {
   "schema": 5,
   "region": "福建宁德",
-  "generated_at": "2026-10-29T17:00:40+08:00",
+  "generated_at": "2026-10-29T17:58:08+08:00",
   "history": [
     {
       "day": "2023-01-03",
@@ -686,9 +686,18 @@
       },
       "source": "official",
       "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202609/t20260924_7218113.htm"
+    },
+    {
+      "day": "2026-10-29",
+      "p": {
+        "92": 8.84,
+        "95": 9.44
+      },
+      "source": "official",
+      "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202610/t20261029_7242151.htm"
     }
   ],
-  "latest_official_day": "2026-09-24",
+  "latest_official_day": "2026-10-29",
   "official_index": "https://fgw.fujian.gov.cn/ztzl/fjswjj/cpygg/",
   "current": {
     "p": {
@@ -704,7 +713,7 @@
       "source": "极数本源",
       "url": "https://apizero.cn/aidocs/oil-price",
       "price_date": "2026-10-29",
-      "checked_at": "2026-10-29T17:00:40+08:00",
+      "checked_at": "2026-10-29T17:58:08+08:00",
       "region": "福建"
     }
   },
@@ -896,14 +905,14 @@
     }
   ],
   "health": {
-    "checked_at": "2026-10-29T17:00:40+08:00",
+    "checked_at": "2026-10-29T17:58:08+08:00",
     "index_ok": true,
     "link_count": 76,
     "source_count": 4,
     "source_errors": [],
-    "verified_count": 1,
-    "latest_official_day": "2026-09-24",
-    "latest_official_age_days": 35,
+    "verified_count": 2,
+    "latest_official_day": "2026-10-29",
+    "latest_official_age_days": 0,
     "api98_ok": true,
     "api98_source": "极数本源",
     "api_ok": true,
