@@ -1,7 +1,7 @@
 {
   "schema": 5,
   "region": "福建宁德",
-  "generated_at": "2026-10-29T23:05:10+08:00",
+  "generated_at": "2026-10-30T00:01:44+08:00",
   "history": [
     {
       "day": "2023-01-03",
@@ -891,21 +891,22 @@
       "day": "2026-10-29",
       "p": 10.65,
       "source": "极数本源",
-      "url": "https://apizero.cn/aidocs/oil-price"
+      "url": "https://apizero.cn/aidocs/oil-price",
+      "verified_by": []
     }
   ],
   "health": {
-    "checked_at": "2026-10-29T23:05:10+08:00",
+    "checked_at": "2026-10-30T00:01:44+08:00",
     "index_ok": true,
     "link_count": 76,
     "source_count": 4,
     "source_errors": [],
-    "verified_count": 2,
+    "verified_count": 1,
     "latest_official_day": "2026-10-29",
-    "latest_official_age_days": 0,
-    "api98_ok": true,
-    "api98_source": "极数本源",
-    "api_ok": true,
+    "latest_official_age_days": 1,
+    "api98_ok": false,
+    "api98_source": null,
+    "api_ok": false,
     "api_latest_asof": "2026-10-29"
   }
 }
