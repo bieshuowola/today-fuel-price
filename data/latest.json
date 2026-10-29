@@ -1,7 +1,7 @@
 {
   "schema": 5,
   "region": "福建宁德",
-  "generated_at": "2026-10-29T07:45:19+08:00",
+  "generated_at": "2026-10-29T09:05:58+08:00",
   "history": [
     {
       "day": "2023-01-03",
@@ -703,12 +703,22 @@
       "p98": 10.65,
       "source": "极数本源",
       "url": "https://apizero.cn/aidocs/oil-price",
-      "price_date": "2026-10-28",
-      "checked_at": "2026-10-29T07:45:19+08:00",
+      "price_date": "2026-10-29",
+      "checked_at": "2026-10-29T09:05:58+08:00",
       "region": "福建"
     }
   },
-  "forecast": null,
+  "forecast": {
+    "window": "2026-10-29",
+    "direction": "上调",
+    "asof": "2026-10-29",
+    "source": "60s 油价预测（第三方）",
+    "url": "https://docs.60s-api.viki.moe/376793576e0",
+    "range": [
+      0.31,
+      0.37
+    ]
+  },
   "windows": [
     "2026-10-29",
     "2026-11-12",
@@ -886,7 +896,7 @@
     }
   ],
   "health": {
-    "checked_at": "2026-10-29T07:45:19+08:00",
+    "checked_at": "2026-10-29T09:05:58+08:00",
     "index_ok": true,
     "link_count": 76,
     "source_count": 4,
