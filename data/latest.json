@@ -1,7 +1,7 @@
 {
   "schema": 5,
   "region": "福建宁德",
-  "generated_at": "2026-10-30T16:09:22+08:00",
+  "generated_at": "2026-10-30T21:04:08+08:00",
   "history": [
     {
       "day": "2023-01-03",
@@ -701,15 +701,25 @@
   "official_index": "https://fgw.fujian.gov.cn/ztzl/fjswjj/cpygg/",
   "current": {
     "p": {
-      "92": 8.57,
-      "95": 9.15,
-      "98": 10.65
+      "92": 8.84,
+      "95": 9.44,
+      "98": 10.94
     },
     "asof": "2026-10-30",
     "source": "60s 油价 API",
     "region": "福建宁德"
   },
-  "forecast": null,
+  "forecast": {
+    "window": "2026-11-12",
+    "direction": "上调",
+    "asof": "2026-10-30",
+    "source": "60s 油价预测（第三方）",
+    "url": "https://docs.60s-api.viki.moe/376793576e0",
+    "range": [
+      0.07,
+      0.08
+    ]
+  },
   "windows": [
     "2026-10-29",
     "2026-11-12",
@@ -895,7 +905,7 @@
     }
   ],
   "health": {
-    "checked_at": "2026-10-30T16:09:22+08:00",
+    "checked_at": "2026-10-30T21:04:08+08:00",
     "index_ok": true,
     "link_count": 76,
     "source_count": 4,
