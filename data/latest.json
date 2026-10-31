@@ -1,7 +1,7 @@
 {
   "schema": 5,
   "region": "福建宁德",
-  "generated_at": "2026-10-31T02:00:54+08:00",
+  "generated_at": "2026-10-31T09:07:37+08:00",
   "history": [
     {
       "day": "2023-01-03",
@@ -706,10 +706,28 @@
       "98": 10.94
     },
     "asof": "2026-10-31",
-    "source": "60s 油价 API",
-    "region": "福建宁德"
+    "source": "98号第三方参考",
+    "region": "福建宁德",
+    "ref98": {
+      "p98": 10.94,
+      "source": "极数本源",
+      "url": "https://apizero.cn/aidocs/oil-price",
+      "price_date": "2026-10-31",
+      "checked_at": "2026-10-31T09:07:37+08:00",
+      "region": "福建"
+    }
   },
-  "forecast": null,
+  "forecast": {
+    "window": "2026-11-12",
+    "direction": "上调",
+    "asof": "2026-10-31",
+    "source": "60s 油价预测（第三方）",
+    "url": "https://docs.60s-api.viki.moe/376793576e0",
+    "range": [
+      0.07,
+      0.08
+    ]
+  },
   "windows": [
     "2026-10-29",
     "2026-11-12",
@@ -896,13 +914,12 @@
     {
       "day": "2026-10-31",
       "p": 10.94,
-      "source": "第三方参考",
-      "url": "",
-      "verified_by": []
+      "source": "极数本源",
+      "url": "https://apizero.cn/aidocs/oil-price"
     }
   ],
   "health": {
-    "checked_at": "2026-10-31T02:00:54+08:00",
+    "checked_at": "2026-10-31T09:07:37+08:00",
     "index_ok": true,
     "link_count": 76,
     "source_count": 4,
@@ -910,8 +927,8 @@
     "verified_count": 1,
     "latest_official_day": "2026-10-29",
     "latest_official_age_days": 2,
-    "api98_ok": false,
-    "api98_source": null,
+    "api98_ok": true,
+    "api98_source": "极数本源",
     "api_ok": true,
     "api_latest_asof": "2026-10-31"
   }
