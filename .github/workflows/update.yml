@@ -27,10 +27,10 @@ concurrency:
 jobs:
   sync-and-publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 32
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment_retry.outputs.page_url || steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -59,7 +59,15 @@ jobs:
       - name: Verify new official notices and fetch current price
         id: sync
         continue-on-error: true
-        run: python scripts/update_feed.py
+        run: |
+          python scripts/update_feed.py
+          if git diff --quiet -- data/latest.json; then
+            echo "publish_site=false" >> "$GITHUB_OUTPUT"
+            echo 'Public dataset unchanged; no scheduled Pages deployment is needed.'
+          else
+            echo "publish_site=true" >> "$GITHUB_OUTPUT"
+            echo 'Public dataset changed or six-hour heartbeat advanced; Pages deployment is needed.'
+          fi
       - name: Persist verified dataset in repository
         if: steps.sync.outcome == 'success'
         shell: bash
@@ -97,7 +105,24 @@ jobs:
             git commit -m 'Record acknowledged fuel-price notification'
             bash scripts/git_push_retry.sh
           fi
+      - name: Decide whether public site needs deployment
+        id: deploy_gate
+        if: always()
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SYNC_OUTCOME: ${{ steps.sync.outcome }}
+          DATA_CHANGED: ${{ steps.sync.outputs.publish_site }}
+        shell: bash
+        run: |
+          if [[ "$EVENT_NAME" != "schedule" || "$SYNC_OUTCOME" == "failure" || "$DATA_CHANGED" == "true" ]]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "Publishing site: code/manual trigger, changed public data, or failed sync fallback."
+          else
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping Pages deployment: scheduled check found no public data change."
+          fi
       - name: Prepare minimal public site
+        if: steps.deploy_gate.outputs.publish == 'true'
         shell: bash
         run: |
           mkdir -p public/data
@@ -107,12 +132,24 @@ jobs:
           cp data/latest.json public/data/latest.json
           touch public/.nojekyll
       - uses: actions/configure-pages@v5
+        if: steps.deploy_gate.outputs.publish == 'true'
       - uses: actions/upload-pages-artifact@v3
+        if: steps.deploy_gate.outputs.publish == 'true'
         with:
           path: public
       - id: deployment
+        if: steps.deploy_gate.outputs.publish == 'true'
         uses: actions/deploy-pages@v4
+        continue-on-error: true
+        with:
+          timeout: "720000"
+      - id: deployment_retry
+        if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        with:
+          timeout: "720000"
       - name: Smoke-test published site and data feed
+        if: steps.deployment.outcome == 'success' || steps.deployment_retry.outcome == 'success'
         shell: bash
         run: |
           python - <<'PY'
