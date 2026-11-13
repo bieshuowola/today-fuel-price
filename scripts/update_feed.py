@@ -333,6 +333,49 @@ def get_98_history(now,history):
     print('98号多源交叉核验成功:',len(trusted),'条；区间',trusted[0]['day'],trusted[-1]['day'])
     return trusted
 
+def record_fresh_98_observation(by_day, current, verified_98, fresh_api, official_prices, official_day, now):
+    """Append a dated 98 quote, replacing only an unverified same-day carry-forward.
+
+    A fresh 60s quote is a third-party observation, not a confirmed 98 tariff
+    nor sufficient evidence for a formal 98 notification.
+    """
+    if verified_98 is not None:
+        day=verified_98['price_date']
+        value=float(verified_98['p98'])
+        source=verified_98['source']
+        url=verified_98['url']
+    elif fresh_api and isinstance(current,dict) and current.get('source')=='60s 油价 API':
+        day=current.get('asof')
+        p=current.get('p') or {}
+        try:
+            p92,p95,value=(float(p[k]) for k in ('92','95','98'))
+        except (ValueError,TypeError,KeyError):
+            return False
+        if any(abs(v-official_prices[k])>0.04 for k,v in (('92',p92),('95',p95))):
+            return False
+        if not p95+0.10<=value<=p95+6.0:
+            return False
+        source='60s 油价 API'
+        url=''
+    else:
+        return False
+
+    if not iso_date(day)==day or not 5<value<27:
+        return False
+    effective=(dt.date.fromisoformat(official_day)+dt.timedelta(days=1)).isoformat()
+    if not effective<=day<=now.date().isoformat():
+        return False
+
+    previous=by_day.get(day)
+    if previous:
+        if previous.get('verified_by') or previous.get('source') not in ('第三方参考','60s 油价 API'):
+            if abs(previous['p']-value)>0.04:
+                print('保留已有98号高可信度历史报价，不覆盖冲突日期:',day,file=sys.stderr)
+            return False
+    by_day[day]={'day':day,'p':round(value,2),'source':source,'url':url}
+    return True
+
+
 def run():
     now=NOW();old={}
     if OUT.exists():
@@ -342,6 +385,7 @@ def run():
     if not history:raise RuntimeError('官方历史基线丢失')
     health=official_scan(history,now)
     current,forecast=get_current(now)
+    fresh_api=current is not None
     last_effective=max(k for k in history if k<now.date().isoformat())
     verified_98=get_98_reference(now,history[last_effective]['p'],last_effective)
     if verified_98:
@@ -365,10 +409,8 @@ def run():
         if previous is None:by_day[row['day']]=row
         elif abs(previous['p']-row['p'])>0.04:
             print('拒绝98号历史数据冲突:',row['day'],file=sys.stderr)
-    if current and '98' in current.get('p',{}) and current.get('asof'):
-        day=current['asof'];value=float(current['p']['98'])
-        if 5<value<27 and (verified_98 is not None or day not in by_day):
-            by_day[day]={'day':day,'p':value,'source':verified_98['source'] if verified_98 else '第三方参考','url':verified_98['url'] if verified_98 else ''}
+    record_fresh_98_observation(by_day,current,verified_98,fresh_api,
+                                history[last_effective]['p'],last_effective,now)
     obs=[by_day[d] for d in sorted(by_day)][-180:]
     windows=[]
     if forecast:windows=[forecast['window']]

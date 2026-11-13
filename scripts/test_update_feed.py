@@ -134,4 +134,69 @@ class SyncTests(unittest.TestCase):
   self.assertEqual(rows[-1]['p'],10.65)
 
 
+ def test_98_first_tariff_change_repairs_same_day_carry_forward(self):
+  """The observed 10.39 price must replace the existing 11/13 placeholder 10.94."""
+  now=dt.datetime(2026,11,14,0,22,tzinfo=ZoneInfo('Asia/Shanghai'))
+  history={
+   '2026-10-29':{'day':'2026-10-29','p':{'92':8.84,'95':9.44},'source':'official','url':NOTICE('2026-10-29')},
+   '2026-11-12':{'day':'2026-11-12','p':{'92':8.33,'95':8.89},'source':'official','url':NOTICE('2026-11-12')}}
+  old={'schema':5,'generated_at':'2026-11-13T21:19:23+08:00','obs98':[
+   {'day':'2026-10-31','p':10.94,'source':'极数本源','url':'https://apizero.cn/aidocs/oil-price'},
+   {'day':'2026-11-12','p':10.94,'source':'第三方参考','url':''},
+   {'day':'2026-11-13','p':10.94,'source':'第三方参考','url':''}]}
+  live={'p':{'92':8.33,'95':8.89,'98':10.39},'asof':'2026-11-13','source':'60s 油价 API','region':'福建宁德'}
+  health={'checked_at':now.isoformat(),'index_ok':True,'latest_official_day':'2026-11-12'}
+  with TemporaryDirectory() as directory:
+   out=Path(directory)/'latest.json'
+   out.write_text(json.dumps(old),encoding='utf-8')
+   with mock.patch.object(sync,'OUT',out),mock.patch.object(sync,'NOW',return_value=now),\
+        mock.patch.object(sync,'load_history',return_value=history),\
+        mock.patch.object(sync,'official_scan',return_value=health),\
+        mock.patch.object(sync,'get_current',return_value=(live,None)),\
+        mock.patch.object(sync,'get_98_reference',return_value=None),\
+        mock.patch.object(sync,'get_98_history',return_value=[]):
+    self.assertTrue(sync.run())
+   saved=json.loads(out.read_text(encoding='utf-8'))
+  observations={r['day']:r for r in saved['obs98']}
+  self.assertEqual(len(saved['obs98']),3)
+  self.assertEqual(observations['2026-11-12']['p'],10.94)
+  self.assertEqual(observations['2026-11-13']['p'],10.39)
+  self.assertEqual(observations['2026-11-13']['source'],'60s 油价 API')
+  self.assertEqual(round(observations['2026-11-13']['p']-observations['2026-11-12']['p'],2),-0.55)
+  self.assertEqual(saved['current']['p']['98'],10.39)
+  self.assertFalse(saved['health']['api98_ok'])
+
+ def test_98_history_rejects_inconsistent_or_stale_live_quotes(self):
+  now=dt.datetime(2026,11,14,0,22,tzinfo=ZoneInfo('Asia/Shanghai'))
+  official={'92':8.33,'95':8.89}
+  baseline={'day':'2026-11-13','p':10.94,'source':'第三方参考','url':''}
+  for tamper in ({'92':8.84},{'95':9.44},{'98':8.90}):
+   prices={**official,'98':10.39,**tamper}
+   by_day={'2026-11-13':dict(baseline)}
+   live={'p':prices,'asof':'2026-11-13','source':'60s 油价 API'}
+   self.assertFalse(sync.record_fresh_98_observation(by_day,live,None,True,official,'2026-11-12',now))
+   self.assertEqual(by_day['2026-11-13']['p'],10.94)
+  for quote_day in ('2026-11-12','2026-11-15'):
+   by_day={'2026-11-13':dict(baseline)}
+   live={'p':{**official,'98':10.39},'asof':quote_day,'source':'60s 油价 API'}
+   self.assertFalse(sync.record_fresh_98_observation(by_day,live,None,True,official,'2026-11-12',now))
+  by_day={'2026-11-13':dict(baseline)}
+  live={'p':{**official,'98':10.39},'asof':'2026-11-13','source':'60s 油价 API'}
+  self.assertFalse(sync.record_fresh_98_observation(by_day,live,None,False,official,'2026-11-12',now))
+  self.assertEqual(by_day['2026-11-13']['p'],10.94)
+
+ def test_98_history_preserves_corroborrated_quote_and_original_quote_date(self):
+  now=dt.datetime(2026,11,14,0,22,tzinfo=ZoneInfo('Asia/Shanghai'))
+  official={'92':8.33,'95':8.89}
+  trusted={'day':'2026-11-13','p':10.55,'source':'第三方多源参考','verified_by':['a','b']}
+  by_day={'2026-11-13':dict(trusted)}
+  ref={'price_date':'2026-11-13','p98':10.39,'source':'极数本源','url':'https://apizero.cn/aidocs/oil-price'}
+  self.assertFalse(sync.record_fresh_98_observation(by_day,None,ref,False,official,'2026-11-12',now))
+  self.assertEqual(by_day['2026-11-13'],trusted)
+  by_day={}
+  self.assertTrue(sync.record_fresh_98_observation(by_day,None,ref,False,official,'2026-11-12',now))
+  self.assertEqual(by_day['2026-11-13']['p'],10.39)
+  self.assertNotIn('2026-11-14',by_day)
+
+
 if __name__=='__main__':unittest.main()
