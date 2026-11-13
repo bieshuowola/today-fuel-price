@@ -1,7 +1,7 @@
 {
   "schema": 5,
   "region": "福建宁德",
-  "generated_at": "2026-11-13T21:19:23+08:00",
+  "generated_at": "2026-11-14T04:01:33+08:00",
   "history": [
     {
       "day": "2023-01-03",
@@ -79,7 +79,7 @@
       "day": "2023-05-30",
       "p": {
         "92": 7.49,
-        "95": 8
+        "95": 8.0
       },
       "source": "official",
       "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202305/t20230530_6179257.htm"
@@ -385,7 +385,7 @@
       "day": "2025-03-05",
       "p": {
         "92": 7.49,
-        "95": 8
+        "95": 8.0
       },
       "source": "official",
       "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202503/t20250305_6773083.htm"
@@ -1002,17 +1002,17 @@
     }
   ],
   "health": {
-    "checked_at": "2026-11-13T21:19:23+08:00",
+    "checked_at": "2026-11-14T04:01:33+08:00",
     "index_ok": true,
     "link_count": 76,
     "source_count": 4,
     "source_errors": [],
     "verified_count": 2,
     "latest_official_day": "2026-11-12",
-    "latest_official_age_days": 1,
+    "latest_official_age_days": 2,
     "api98_ok": false,
     "api98_source": null,
-    "api_ok": true,
+    "api_ok": false,
     "api_latest_asof": "2026-11-13"
   }
 }
