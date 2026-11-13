@@ -79,7 +79,7 @@
       "day": "2023-05-30",
       "p": {
         "92": 7.49,
-        "95": 8.0
+        "95": 8
       },
       "source": "official",
       "url": "https://fgw.fj.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202305/t20230530_6179257.htm"
@@ -385,7 +385,7 @@
       "day": "2025-03-05",
       "p": {
         "92": 7.49,
-        "95": 8.0
+        "95": 8
       },
       "source": "official",
       "url": "https://fgw.fujian.gov.cn/zfxxgkzl/zfxxgkml/yzdgkdqtxx/202503/t20250305_6773083.htm"
@@ -995,8 +995,8 @@
     },
     {
       "day": "2026-11-13",
-      "p": 10.94,
-      "source": "第三方参考",
+      "p": 10.39,
+      "source": "60s 油价 API",
       "url": "",
       "verified_by": []
     }
