@@ -145,7 +145,7 @@ class SyncTests(unittest.TestCase):
    {'day':'2026-11-12','p':10.94,'source':'第三方参考','url':''},
    {'day':'2026-11-13','p':10.94,'source':'第三方参考','url':''}]}
   live={'p':{'92':8.33,'95':8.89,'98':10.39},'asof':'2026-11-13','source':'60s 油价 API','region':'福建宁德'}
-  health={'checked_at':now.isoformat(),'index_ok':True,'latest_official_day':'2026-11-12'}
+  health={'checked_at':now.isoformat(),'index_ok':True,'latest_official_day':'2026-11-12','verified_count':1}
   with TemporaryDirectory() as directory:
    out=Path(directory)/'latest.json'
    out.write_text(json.dumps(old),encoding='utf-8')
