@@ -166,5 +166,21 @@ class NotificationTests(unittest.TestCase):
         self.assertEqual(event['title'],'今日油价 · 油价下调')
         self.assertIn('10月16日00:00起执行',event['message'])
 
+
+    def test_unverified_98_history_repair_never_replays_ntfy_alert(self):
+        """98 may change in the chart without a new independently verified 98 notification."""
+        with TemporaryDirectory() as d:
+            feed,old,new,path,cursor=self.case(d,changed=False,include98=False)
+            feed['current']={'p':{'92':8.00,'95':8.50,'98':10.39},
+                             'source':'60s 油价 API','asof':dt.datetime.now(TZ).date().isoformat()}
+            feed['obs98'].append({'day':new,'p':10.39,'source':'60s 油价 API'})
+            feed['health']['api98_ok']=False
+            path.write_text(json.dumps(feed,ensure_ascii=False),encoding='utf-8')
+            n.save_cursor({'schema':1,'last_official_day':new,'last_98_cycle':old},cursor)
+            sender=mock.Mock()
+            self.assertEqual(n.run(feed_path=path,cursor_path=cursor,topic='test-topic-1234',sender=sender),[])
+            sender.assert_not_called()
+
+
 if __name__=='__main__':
     unittest.main()
