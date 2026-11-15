@@ -1,7 +1,7 @@
 {
   "schema": 5,
   "region": "福建宁德",
-  "generated_at": "2026-11-15T10:38:45+08:00",
+  "generated_at": "2026-11-15T18:52:13+08:00",
   "history": [
     {
       "day": "2023-01-03",
@@ -1015,7 +1015,7 @@
     }
   ],
   "health": {
-    "checked_at": "2026-11-15T10:38:45+08:00",
+    "checked_at": "2026-11-15T18:52:13+08:00",
     "index_ok": true,
     "link_count": 76,
     "source_count": 4,
