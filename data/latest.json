@@ -1,7 +1,7 @@
 {
   "schema": 5,
   "region": "福建宁德",
-  "generated_at": "2026-11-19T05:56:21+08:00",
+  "generated_at": "2026-11-19T11:26:47+08:00",
   "history": [
     {
       "day": "2023-01-03",
@@ -714,7 +714,7 @@
       "95": 8.89,
       "98": 10.39
     },
-    "asof": "2026-11-18",
+    "asof": "2026-11-19",
     "source": "60s 油价 API",
     "region": "福建宁德"
   },
@@ -1034,10 +1034,16 @@
       "source": "60s 油价 API",
       "url": "",
       "verified_by": []
+    },
+    {
+      "day": "2026-11-19",
+      "p": 10.39,
+      "source": "60s 油价 API",
+      "url": ""
     }
   ],
   "health": {
-    "checked_at": "2026-11-19T05:56:21+08:00",
+    "checked_at": "2026-11-19T11:26:47+08:00",
     "index_ok": true,
     "link_count": 76,
     "source_count": 4,
@@ -1047,7 +1053,7 @@
     "latest_official_age_days": 7,
     "api98_ok": false,
     "api98_source": null,
-    "api_ok": false,
-    "api_latest_asof": "2026-11-18"
+    "api_ok": true,
+    "api_latest_asof": "2026-11-19"
   }
 }
